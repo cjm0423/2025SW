@@ -29,9 +29,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginStart="8dp"/>
 
-        <!-- 2) 입력 필드들 -->
-
-        <!-- 2-1 닉네임 -->
+        <!-- 2-1) 닉네임 -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
@@ -55,7 +53,7 @@
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-2 생년월일 -->
+        <!-- 2-2) 생년월일 -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
@@ -79,7 +77,7 @@
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-3 주거지 -->
+        <!-- 2-3) 주거지 -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
@@ -103,7 +101,7 @@
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-4 소득 분위 -->
+        <!-- 2-4) 소득 분위 -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
@@ -127,7 +125,7 @@
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-5 관심 키워드 (Exposed Dropdown) -->
+        <!-- 2-5) 관심 키워드 (ExposedDropdownMenu) -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
@@ -146,9 +144,11 @@
                 android:id="@+id/actvKeyword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="normal"
                 android:minHeight="48dp"
                 android:paddingTop="12dp"
-                android:paddingBottom="12dp"/>
+                android:paddingBottom="12dp"
+                tools:ignore="SpeakableTextPresent"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 3) 체크박스들 -->
@@ -221,5 +221,6 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp"/>
+
     </LinearLayout>
 </ScrollView>
