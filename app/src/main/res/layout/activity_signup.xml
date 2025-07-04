@@ -1,9 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".signup_activity">
+    android:background="#FFFFFF">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
+
+        <!-- 1. 타이틀 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="비상구"
+            android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:gravity="start"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="15dp"/>
+
+        <!-- 2. 입력 필드들 -->
+        <!-- 2-1 닉네임 -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            app:startIconDrawable="@drawable/ic_email"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            android:elevation="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNickname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="닉네임"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 2-2 생년월일 -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:startIconDrawable="@drawable/ic_email"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            android:elevation="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBirth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="생년월일"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 2-3 주거지 -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:startIconDrawable="@drawable/ic_email"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            android:elevation="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="주거지"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 2-4 소득 분위 -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:startIconDrawable="@drawable/ic_email"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            android:elevation="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etIncome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="소득 분위"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 2-5 관심 키워드 (Multi-select) -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:startIconDrawable="@drawable/ic_email"
+            app:endIconMode="dropdown"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            android:elevation="2dp">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/actvKeyword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="관심 키워드"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 3. 체크박스들 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/cbAgreeInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="개인 정보 수집에 동의하십니까"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/cbAgreeNotify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="알림에 동의하십니까"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <!-- 4. 카카오로 시작하기 버튼 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#FEE500"
+            android:icon="@drawable/ic_kakao_chat"
+            android:iconGravity="textStart"
+            android:iconPadding="8dp"
+            android:text="회원 가입"
+            android:textColor="#000"
+            app:cornerRadius="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp"/>
+    </LinearLayout>
+</ScrollView>
