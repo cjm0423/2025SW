@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    tools:context=".SignupActivity"
+    tools:theme="@style/Theme.MaterialComponents.DayNight">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,26 +16,28 @@
         android:gravity="center_horizontal"
         android:padding="16dp">
 
-        <!-- 1. 타이틀 -->
+        <!-- 1) 타이틀 -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="비상구"
-            android:textSize="30sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        android:gravity="start"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="15dp"/>
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            android:gravity="start"
+            android:layout_marginTop="24dp"
+            android:layout_marginStart="8dp"/>
 
-        <!-- 2. 입력 필드들 -->
+        <!-- 2) 입력 필드들 -->
+
         <!-- 2-1 닉네임 -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="24dp"
+            android:maxWidth="360dp"
             app:startIconDrawable="@drawable/ic_email"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -43,7 +49,10 @@
                 android:id="@+id/etNickname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="닉네임"/>
+                android:hint="닉네임"
+                android:minHeight="48dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 2-2 생년월일 -->
@@ -52,6 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:maxWidth="360dp"
             app:startIconDrawable="@drawable/ic_email"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -63,7 +73,10 @@
                 android:id="@+id/etBirth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="생년월일"/>
+                android:hint="생년월일"
+                android:minHeight="48dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 2-3 주거지 -->
@@ -72,6 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:maxWidth="360dp"
             app:startIconDrawable="@drawable/ic_email"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -83,7 +97,10 @@
                 android:id="@+id/etAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="주거지"/>
+                android:hint="주거지"
+                android:minHeight="48dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 2-4 소득 분위 -->
@@ -92,6 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:maxWidth="360dp"
             app:startIconDrawable="@drawable/ic_email"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -103,17 +121,21 @@
                 android:id="@+id/etIncome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="소득 분위"/>
+                android:hint="소득 분위"
+                android:minHeight="48dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-5 관심 키워드 (Multi-select) -->
+        <!-- 2-5 관심 키워드 (Exposed Dropdown) -->
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:maxWidth="360dp"
+            android:hint="관심 키워드"
             app:startIconDrawable="@drawable/ic_email"
-            app:endIconMode="dropdown"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -124,26 +146,35 @@
                 android:id="@+id/actvKeyword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="관심 키워드"/>
+                android:minHeight="48dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 3. 체크박스들 -->
+        <!-- 3) 체크박스들 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:maxWidth="360dp"
+            android:minHeight="48dp">
 
             <CheckBox
                 android:id="@+id/cbAgreeInfo"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"/>
+
             <TextView
+                android:id="@+id/tvAgreeInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="개인 정보 수집에 동의하십니까"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -151,25 +182,33 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:maxWidth="360dp"
+            android:minHeight="48dp">
 
             <CheckBox
                 android:id="@+id/cbAgreeNotify"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"/>
+
             <TextView
+                android:id="@+id/tvAgreeNotify"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="알림에 동의하십니까"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"/>
         </LinearLayout>
 
-        <!-- 4. 카카오로 시작하기 버튼 -->
+        <!-- 4) 가입 버튼 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSignUp"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="24dp"
+            android:maxWidth="360dp"
             android:backgroundTint="#FEE500"
             android:icon="@drawable/ic_kakao_chat"
             android:iconGravity="textStart"
@@ -178,6 +217,7 @@
             android:textColor="#000"
             app:cornerRadius="8dp"/>
 
+        <!-- 여백 -->
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp"/>
