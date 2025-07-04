@@ -2,6 +2,9 @@
     <string name="app_name">ExitSW</string>
     <string name="kakao_native_app_key">e86dd12ba7f7476869191c601f9e51f4</string>
     <string name="kakao_app_scheme">kakaoe86dd12ba7f7476869191c601f9e51f4</string>
-
+    <string name="textSavinglist">상품 목록</string>
+    <string name="textSavingname">상품 이름</string>
+    <string name="textBankname">은행 이름</string>
+    <string name="textOnelineEx">한 줄 설명</string>
 
 </resources>
