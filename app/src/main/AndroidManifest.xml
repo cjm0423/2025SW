@@ -12,6 +12,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ExitSW"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="@string/kakao_native_app_key" />
+
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!-- scheme과 host는 strings.xml에 정의된 값과 일치해야 합니다 -->
+                <data
+                    android:scheme="@string/kakao_app_scheme"
+                    android:host="oauth" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".signup_activity"
             android:exported="false" />
