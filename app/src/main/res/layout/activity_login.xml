@@ -31,17 +31,7 @@
             android:layout_marginTop="32dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-
-        <!-- 도형 일러스트 (벡터 드로어블) -->
-        <ImageView
-            android:id="@+id/ivShapes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_top_shapes"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle"
-            android:layout_marginTop="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+        
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
