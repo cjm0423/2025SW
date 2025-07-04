@@ -21,7 +21,7 @@
         app:itemIconSize="28dp"
         app:labelVisibilityMode="labeled"
         app:itemBackground="@null"
-        android:background="?attr/android:windowBackground"
+        android:background="@color/white"
         app:itemHorizontalTranslationEnabled="false"
         app:itemRippleColor="@android:color/transparent"
         app:menu="@menu/bottom_nav_menu" />

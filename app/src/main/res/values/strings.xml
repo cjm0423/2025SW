@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ExitSW</string>
+    <string name="kakao_native_app_key">e86dd12ba7f7476869191c601f9e51f4</string>
+    <string name="kakao_app_scheme">kakaoe86dd12ba7f7476869191c601f9e51f4</string>
+
+
 </resources>
