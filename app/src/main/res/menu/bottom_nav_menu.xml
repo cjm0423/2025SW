@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/menu_calculator"
+        android:icon="@drawable/ic_calculator"
+        android:title="적금계산기" />
+
+    <item
+        android:id="@+id/menu_ai"
+        android:icon="@drawable/ic_ai"
+        android:title="AI" />
+
+    <item
+        android:id="@+id/menu_saving"
+        android:icon="@drawable/ic_savings"
+        android:title="상품" />
+
+    <item
+        android:id="@+id/menu_policy"
+        android:icon="@drawable/ic_policy"
+        android:title="정책" />
+</menu>
