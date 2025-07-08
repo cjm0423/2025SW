@@ -1,0 +1,29 @@
+# === Build ===
+.gradle/
+build/
+out/
+bin/
+test-output/
+
+# === Gradle Wrapper ===
+!gradle/wrapper/gradle-wrapper.jar
+
+# === IntelliJ ===
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# === VSCode ===
+.vscode/
+
+# === Logs ===
+*.log
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Secrets ===
+src/main/resources/application.yml
+src/main/resources/application.properties
