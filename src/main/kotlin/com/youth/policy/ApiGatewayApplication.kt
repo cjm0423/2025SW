@@ -24,6 +24,7 @@ class ServerStartupListener : ApplicationListener<WebServerInitializedEvent> {
         println("- 환율 API:              http://localhost:$port/api/exchange-rates")
         println("- 중앙부처복지서비스 목록: http://localhost:$port/api/welfare/services")
         println("- 지자체복지서비스 목록:    http://localhost:$port/api/local/welfare/services")
+        println("- 통계표 목록 API:         http://localhost:$port/api/statistics")
         println()
     }
 }
