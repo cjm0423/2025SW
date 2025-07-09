@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:background="@android:color/white">
+
+    <!-- 상품 이미지 -->
+    <ImageView
+        android:id="@+id/imgSavings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_defaultimg"
+        android:scaleType="centerCrop"
+        android:layout_gravity="center_vertical" />
+
+    <!-- 상품 정보 영역 -->
+    <LinearLayout
+        android:id="@+id/savingInfoLay"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="10dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/textSavingName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textSavingname"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textBankName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textBankname"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/textOnelineEx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textOnelineEx"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            style="?android:attr/ratingBarStyleSmall"
+            android:isIndicator="true"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</LinearLayout>
