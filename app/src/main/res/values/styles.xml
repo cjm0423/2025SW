@@ -1,0 +1,7 @@
+<resources>
+    <!-- 기존 테마 외에 아래처럼 커스텀 스타일 추가 -->
+
+    <style name="NoBackground_ImageButton">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+</resources>
