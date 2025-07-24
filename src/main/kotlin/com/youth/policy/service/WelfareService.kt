@@ -36,12 +36,21 @@ class WelfareService(
             onapPsbltYn = onapPsbltYn,
             orderBy = orderBy
         )
-
         return welfareClient.getWelfareList(request)
     }
 
     fun getWelfareDetail(servId: String): WelfareDetailResponse {
         val request = WelfareDetailRequest(servId = servId)
         return welfareClient.getWelfareDetail(request)
+    }
+
+    fun getMultipleDetails(servIdList: List<String>): List<WelfareDetailResponse> {
+        return servIdList.mapNotNull { servId ->
+            try {
+                getWelfareDetail(servId)
+            } catch (e: Exception) {
+                null // 에러 발생 시 해당 상세는 건너뜀
+            }
+        }
     }
 }
