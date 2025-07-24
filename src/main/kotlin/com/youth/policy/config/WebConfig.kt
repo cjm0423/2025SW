@@ -12,9 +12,6 @@ import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter
 import org.springframework.web.client.RestTemplate
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 
 @Configuration
 class WebConfig {
@@ -32,41 +29,24 @@ class WebConfig {
 
         restTemplate.messageConverters.add(0, xmlConverter)
 
-        // 로깅 인터셉터 추가
-        restTemplate.interceptors.add(LoggingInterceptor())
+        // 최소 로깅 인터셉터 추가 (업무환경 수준)
+        restTemplate.interceptors.add(SimpleLoggingInterceptor())
 
         return restTemplate
     }
 
-    class LoggingInterceptor : ClientHttpRequestInterceptor {
+    // 업무환경에 맞는 최소 로깅
+    class SimpleLoggingInterceptor : ClientHttpRequestInterceptor {
         override fun intercept(
             request: HttpRequest,
             body: ByteArray,
             execution: ClientHttpRequestExecution
         ): ClientHttpResponse {
-            println("🔽 Request URI: ${request.uri}")
-            println("🔽 Request Method: ${request.method}")
-            println("🔽 Request Headers: ${request.headers}")
-            if (body.isNotEmpty()) {
-                println("🔽 Request Body: ${String(body, StandardCharsets.UTF_8)}")
-            }
-
+            // 핵심 정보만 로깅 (이모지, 바디 출력 X)
+            println("Request: [${request.method}] ${request.uri}")
             val response = execution.execute(request, body)
-
-            println("✅ Response Status: ${response.statusCode}")
-            println("✅ Response Headers: ${response.headers}")
-
-            val responseBody = BufferedReader(InputStreamReader(response.body, StandardCharsets.UTF_8)).use { it.readText() }
-            println("✅ Response Body (500자 미리보기): ${responseBody.take(500)}")
-
-            return ClientHttpResponseWrapper(response, responseBody.toByteArray(StandardCharsets.UTF_8))
+            println("Response: ${response.statusCode} for ${request.uri}")
+            return response
         }
-    }
-
-    class ClientHttpResponseWrapper(
-        private val response: ClientHttpResponse,
-        private val body: ByteArray
-    ) : ClientHttpResponse by response {
-        override fun getBody() = body.inputStream()
     }
 }
