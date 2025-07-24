@@ -28,9 +28,8 @@ class WelfareController(
         @RequestParam(required = false) onapPsbltYn: String?,
         @RequestParam(required = false) orderBy: String?
     ): WelfareListResponse {
-        try {
-            println("복지 서비스 목록 API 호출됨 - 파라미터: pageNo=$pageNo, numOfRows=$numOfRows, srchKeyCode=$srchKeyCode")
-            val result = welfareService.getWelfareList(
+        return try {
+            welfareService.getWelfareList(
                 pageNo = pageNo,
                 numOfRows = numOfRows,
                 srchKeyCode = srchKeyCode,
@@ -42,11 +41,7 @@ class WelfareController(
                 onapPsbltYn = onapPsbltYn,
                 orderBy = orderBy
             )
-            println("복지 서비스 목록 API 처리 완료")
-            return result
         } catch (e: Exception) {
-            println("복지 서비스 목록 API 에러 발생: ${e.message}")
-            e.printStackTrace()
             throw e
         }
     }
@@ -55,14 +50,9 @@ class WelfareController(
     fun getWelfareDetail(
         @PathVariable servId: String
     ): WelfareDetailResponse {
-        try {
-            println("복지 서비스 상세 API 호출됨 - servId: $servId")
-            val result = welfareService.getWelfareDetail(servId)
-            println("복지 서비스 상세 API 처리 완료")
-            return result
+        return try {
+            welfareService.getWelfareDetail(servId)
         } catch (e: Exception) {
-            println("복지 서비스 상세 API 에러 발생: ${e.message}")
-            e.printStackTrace()
             throw e
         }
     }
