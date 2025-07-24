@@ -19,10 +19,8 @@ class WelfareClient(
 
     fun getWelfareList(request: WelfareListRequest): WelfareListResponse {
         val uri = buildListUri(request)
-        println("API 호출 URL: $uri")
 
         val rawResponse = restTemplate.getForObject(uri, String::class.java)
-        println("전체 응답:\n$rawResponse")
 
         if (rawResponse?.contains("<cmmMsgHeader>") == true) {
             val errorResponse = restTemplate.getForObject(uri, WelfareErrorResponse::class.java)
@@ -37,10 +35,8 @@ class WelfareClient(
 
     fun getWelfareDetail(request: WelfareDetailRequest): WelfareDetailResponse {
         val uri = buildDetailUri(request)
-        println("상세 API 호출 URL: $uri")
 
         val rawResponse = restTemplate.getForObject(uri, String::class.java)
-        println("상세 원본 응답 일부: ${rawResponse?.take(500)}")
 
         if (rawResponse?.contains("<cmmMsgHeader>") == true) {
             val errorResponse = restTemplate.getForObject(uri, WelfareErrorResponse::class.java)
