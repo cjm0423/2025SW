@@ -1,15 +1,21 @@
 package com.youth.policy.service
 
 import com.youth.policy.client.WelfareClient
-import com.youth.policy.model.WelfareDetailRequest
-import com.youth.policy.model.WelfareDetailResponse
+import com.youth.policy.client.LocalWelfareClient
 import com.youth.policy.model.WelfareListRequest
 import com.youth.policy.model.WelfareListResponse
+import com.youth.policy.model.WelfareDetailRequest
+import com.youth.policy.model.WelfareDetailResponse
+import com.youth.policy.model.LocalWelfareListRequest
+import com.youth.policy.model.LocalWelfareListResponse
+import com.youth.policy.model.LocalWelfareDetailRequest
+import com.youth.policy.model.LocalWelfareDetailResponse
 import org.springframework.stereotype.Service
 
 @Service
 class WelfareService(
-    private val welfareClient: WelfareClient
+    private val welfareClient: WelfareClient,
+    private val localClient: LocalWelfareClient
 ) {
 
     fun getWelfareList(
@@ -36,6 +42,7 @@ class WelfareService(
             onapPsbltYn = onapPsbltYn,
             orderBy = orderBy
         )
+
         return welfareClient.getWelfareList(request)
     }
 
@@ -44,13 +51,17 @@ class WelfareService(
         return welfareClient.getWelfareDetail(request)
     }
 
-    fun getMultipleDetails(servIdList: List<String>): List<WelfareDetailResponse> {
-        return servIdList.mapNotNull { servId ->
-            try {
-                getWelfareDetail(servId)
-            } catch (e: Exception) {
-                null // 에러 발생 시 해당 상세는 건너뜀
-            }
-        }
+    fun getLocalWelfareList(
+        sigunguCd: String,
+        pageNo: Int = 1,
+        numOfRows: Int = 10
+    ): LocalWelfareListResponse {
+        val req = LocalWelfareListRequest(sigunguCd, pageNo, numOfRows)
+        return localClient.getLocalWelfareList(req)
+    }
+
+    fun getLocalWelfareDetail(sigunguCd: String, servId: String): LocalWelfareDetailResponse {
+        val req = LocalWelfareDetailRequest(sigunguCd = sigunguCd, servId = servId)
+        return localClient.getLocalWelfareDetail(req)
     }
 }
