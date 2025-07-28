@@ -14,5 +14,5 @@ data class WelfareListRequest(
 )
 
 data class WelfareDetailRequest(
-    val servId: String
+    val servId: String = "WLF00001138"
 )

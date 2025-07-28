@@ -51,13 +51,12 @@ class WelfareController(
         }
     }
 
-    @GetMapping("/services/{servId}")
-    fun getWelfareDetail(
-        @PathVariable servId: String
-    ): WelfareDetailResponse {
+   @GetMapping("/services/detail/default")
+    fun getDefaultWelfareDetail(): WelfareDetailResponse {
+        val fixedServId = "WLF00001138"
         try {
-            println("복지 서비스 상세 API 호출됨 - servId: $servId")
-            val result = welfareService.getWelfareDetail(servId)
+            println("복지 서비스 상세 API 호출됨 - 고정 servId: $fixedServId")
+            val result = welfareService.getWelfareDetail(fixedServId)
             println("복지 서비스 상세 API 처리 완료")
             return result
         } catch (e: Exception) {

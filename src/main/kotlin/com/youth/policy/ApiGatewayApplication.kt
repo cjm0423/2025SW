@@ -21,7 +21,8 @@ class ServerStartupListener : ApplicationListener<WebServerInitializedEvent> {
         println("API 서버 주소: http://localhost:$port")
         println("사용 가능한 API 목록:")
         println("- 중앙부처복지서비스 목록: http://localhost:$port/api/welfare/services")
-        println("- 중앙부처복지서비스 상세: http://localhost:$port/api/welfare/services")
-        println()
+        println("- 중앙부처복지서비스 상세: http://localhost:$port/api/welfare/services/detail/default")
+        println("- 청년정책 API:           http://localhost:$port/api/youth/policies")
+        println("- 지자체복지서비스 목록:    http://localhost:$port/api/local/welfare/services")
     }
 }
