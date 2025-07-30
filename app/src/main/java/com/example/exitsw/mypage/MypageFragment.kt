@@ -19,17 +19,6 @@ class MypageFragment : Fragment() {
                               savedInstanceState: Bundle?): View {
         binding = FragmentMypageBinding.inflate(inflater, container, false)
 
-        val adapter = MypageAdapter { item ->
-            // 아이템 클릭 시 처리
-        }
-
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-
-        viewModel.productList.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-        }
-
         return binding.root
     }
 }
