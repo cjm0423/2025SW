@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:padding="8dp"
-            android:src="@drawable/ic_arrowback" />
+            android:src="@drawable/ic_arrow_back" />
 
         <!-- 버튼으로 만들어서 누르면 홈으로 가게 -->
         <TextView

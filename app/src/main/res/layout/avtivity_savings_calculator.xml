@@ -20,11 +20,12 @@
         <!-- 뒤로가기 버튼 -->
         <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:padding="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_arrow_back"
+            android:contentDescription="뒤로가기"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_margin="16dp"/>
@@ -105,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:text="상품"
                     app:chipIcon="@drawable/ic_check"
-                    app:checked="true"/>
+                    android:checked="true"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPolicy"
