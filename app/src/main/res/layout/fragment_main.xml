@@ -100,21 +100,12 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <!-- 내부 콘텐츠: 하나의 뷰만 감싸야 합니다 -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <!-- 여기에 추천 카드나 텍스트뷰 등 아이템 추가 -->
-
-                    </LinearLayout>
-
-                </HorizontalScrollView>
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/itemRecycler"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"/>
 
                 </LinearLayout>
 
