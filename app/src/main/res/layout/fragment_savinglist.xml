@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:padding="8dp"
-            android:src="@drawable/ic_arrowback" />
+            android:src="@drawable/ic_arrow_back" />
 
         <TextView
             android:id="@+id/textSavinglist"

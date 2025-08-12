@@ -1,11 +1,17 @@
+# IDE 설정
 *.iml
-.gradle
-/local.properties
-
 .idea/
-.DS_Store
-/build
+
+# Gradle
+.gradle
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# Android Studio
+/local.properties
+/D.S_Store
+/build
+
+# 앱 환경설정 파일
+/app/src/main/res/application.yml
