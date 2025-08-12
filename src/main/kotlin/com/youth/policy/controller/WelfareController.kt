@@ -3,13 +3,15 @@ package com.youth.policy.controller
 import com.youth.policy.model.WelfareDetailResponse
 import com.youth.policy.model.WelfareListResponse
 import com.youth.policy.model.LocalWelfareDetailResponse
-import com.youth.policy.model.LocalWelfareListResponse 
+import com.youth.policy.model.LocalWelfareListResponse
 import com.youth.policy.service.WelfareService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import com.youth.policy.model.LocalWelfareJsonResponse
+import org.springframework.http.MediaType
 
 @RestController
 @RequestMapping("/api/welfare")
@@ -83,4 +85,14 @@ class WelfareController(
         @RequestParam sigunguCd: String
     ): LocalWelfareDetailResponse =
         welfareService.getLocalWelfareDetail(sigunguCd, servId)
+
+    @GetMapping("/local/services/json", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getLocalWelfareListAsJson(
+        @RequestParam sigunguCd: String,
+        @RequestParam(defaultValue = "1") pageNo: Int,
+        @RequestParam(defaultValue = "10") numOfRows: Int
+    ): List<LocalWelfareJsonResponse> {
+        // 4단계에서 만든 서비스 메서드를 호출합니다.
+        return welfareService.getLocalWelfareListAsJson(sigunguCd, pageNo, numOfRows)
+    }
 }

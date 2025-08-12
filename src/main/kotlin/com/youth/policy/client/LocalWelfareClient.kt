@@ -63,4 +63,15 @@ class LocalWelfareClient(
             .queryParam("servId", req.servId)
             .build(true).toUri()
     }
+
+    fun getLocalWelfareListAsXml(req: LocalWelfareListRequest): String {
+        val uri = buildListUri(req) // 기존에 있던 메서드를 재활용합니다.
+        val rawXml = restTemplate.getForObject(uri, String::class.java)
+            ?: throw RuntimeException("지자체 목록 API 응답이 비어있습니다.")
+
+        if (rawXml.contains("<cmmMsgHeader>")) {
+            throw RuntimeException("지자체 목록 API 오류 발생. 응답: $rawXml")
+        }
+        return rawXml
+    }
 }

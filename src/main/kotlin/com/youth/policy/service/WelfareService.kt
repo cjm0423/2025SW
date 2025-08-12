@@ -2,15 +2,10 @@ package com.youth.policy.service
 
 import com.youth.policy.client.WelfareClient
 import com.youth.policy.client.LocalWelfareClient
-import com.youth.policy.model.WelfareListRequest
-import com.youth.policy.model.WelfareListResponse
-import com.youth.policy.model.WelfareDetailRequest
-import com.youth.policy.model.WelfareDetailResponse
-import com.youth.policy.model.LocalWelfareListRequest
-import com.youth.policy.model.LocalWelfareListResponse
-import com.youth.policy.model.LocalWelfareDetailRequest
-import com.youth.policy.model.LocalWelfareDetailResponse
+import com.youth.policy.model.*
 import org.springframework.stereotype.Service
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 @Service
 class WelfareService(
@@ -42,7 +37,6 @@ class WelfareService(
             onapPsbltYn = onapPsbltYn,
             orderBy = orderBy
         )
-
         return welfareClient.getWelfareList(request)
     }
 
@@ -63,5 +57,37 @@ class WelfareService(
     fun getLocalWelfareDetail(sigunguCd: String, servId: String): LocalWelfareDetailResponse {
         val req = LocalWelfareDetailRequest(sigunguCd = sigunguCd, servId = servId)
         return localClient.getLocalWelfareDetail(req)
+    }
+
+    // ─── 추가된 메서드: 여러 시군구코드를 한 번에 조회 후 그룹핑 ───
+    fun getLocalWelfareListByRegions(
+        sigunguCdList: List<String>,
+        pageNo: Int = 1,
+        numOfRows: Int = 10
+    ): Map<String, LocalWelfareListResponse> {
+        return sigunguCdList.associateWith { code ->
+            val req = LocalWelfareListRequest(sigunguCd = code, pageNo = pageNo, numOfRows = numOfRows)
+            localClient.getLocalWelfareList(req)
+        }
+    }
+
+    fun getLocalWelfareListAsJson(sigunguCd: String, pageNo: Int = 1, numOfRows: Int = 10): List<LocalWelfareJsonResponse> {
+        val req = LocalWelfareListRequest(sigunguCd, pageNo, numOfRows)
+
+        // ✨ [최종 해결책] 가장 안정적으로 동작하는 기존 Client 메서드를 호출합니다.
+        val parsedData: LocalWelfareListResponse = localClient.getLocalWelfareList(req)
+
+        // 안정적으로 받아온 데이터를 우리가 원하는 최종 JSON 형태로 변환합니다.
+        return parsedData.servList.map { serv ->
+            LocalWelfareJsonResponse(
+                serviceId = serv.servId,
+                serviceName = serv.servNm,
+                department = serv.bizChrDeptNm,
+                summary = serv.servDgst,
+                region = serv.ctpvNm,
+                city = serv.sggNm,
+                detailLink = serv.servDtlLink
+            )
+        }
     }
 }
