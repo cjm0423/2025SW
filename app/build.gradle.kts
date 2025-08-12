@@ -13,7 +13,9 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
+        val kakaoKey = project.findProperty("KAKAO_APP_KEY") as? String
+            ?: throw GradleException("local.properties에 KAKAO_APP_KEY가 정의되어 있지 않습니다.")
+        manifestPlaceholders["KAKAO_APP_KEY"] = kakaoKey
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

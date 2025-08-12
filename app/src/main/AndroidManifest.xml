@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.exitsw"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
+        android:name=".GlobalApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -11,42 +15,47 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExitSW"
-        android:name=".GlobalApplication"
         tools:targetApi="31">
 
+        <!-- Kakao SDK App Key -->
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value="@string/kakao_native_app_key" />
+            android:value="${KAKAO_APP_KEY}" />
 
+        <!-- 카카오 OAuth Redirect 처리용 액티비티 -->
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- scheme과 host는 strings.xml에 정의된 값과 일치해야 합니다 -->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="@string/kakao_app_scheme"
+                    android:scheme="kakao${KAKAO_APP_KEY}"
                     android:host="oauth" />
             </intent-filter>
         </activity>
 
+        <!-- 런처 액티비티: 로그인 화면으로 지정 -->
         <activity
-            android:name=".signup_activity"
-            android:exported="false" />
-        <activity
-            android:name=".login_activity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-    </application>
 
+
+        <!-- 회원가입 화면 -->
+        <activity
+            android:name=".SignupActivity"
+            android:exported="false" />
+
+        <!-- 메인 화면 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+    </application>
 </manifest>
