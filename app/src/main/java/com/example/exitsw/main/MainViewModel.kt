@@ -11,29 +11,23 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class MainViewModel : ViewModel() {
+
+    // 1. 데이터를 지역별로 묶어서 저장할 LiveData
+    // 예: { "서울시": [정책1, 정책2], "강원도": [정책3] }
+    private val _groupedWelfareData = MutableLiveData<Map<String, List<LocalWelfareServiceDto>>>()
+    val groupedWelfareData: LiveData<Map<String, List<LocalWelfareServiceDto>>> get() = _groupedWelfareData
+
+    // 2. 지역 이름 목록만 따로 저장할 LiveData
+    private val _regionList = MutableLiveData<List<String>>()
+    val regionList: LiveData<List<String>> get() = _regionList
+
+    // 3. 홈 화면 미리보기를 위한 전체 목록 LiveData (필요 시 사용)
     private val _welfareList = MutableLiveData<List<LocalWelfareServiceDto>>()
     val welfareList: LiveData<List<LocalWelfareServiceDto>> get() = _welfareList
 
-    private val _recommendList = MutableLiveData<List<LocalWelfareServiceDto>>()
-    val recommendList: LiveData<List<LocalWelfareServiceDto>> get() = _recommendList
-
-    private val _popularList = MutableLiveData<List<LocalWelfareServiceDto>>()
-    val popularList: LiveData<List<LocalWelfareServiceDto>> get() = _popularList
 
     init {
-        loadPlaceholderData()
         fetchLocalWelfareData()
-    }
-
-    private fun loadPlaceholderData() {
-        // ✨ [변경] 각 목록에 맞는 플레이схолдер 데이터를 생성합니다.
-        val recommendPlaceholder = LocalWelfareServiceDto("REC_LOADING", "추천 상품 로딩중...", "", null, null, null, null)
-        val popularPlaceholder = LocalWelfareServiceDto("POP_LOADING", "인기 상품 로딩중...", "", null, null, null, null)
-        val policyPlaceholder = LocalWelfareServiceDto("POL_LOADING", "정책 로딩중...", "", null, null, null, null)
-
-        _recommendList.value = listOf(recommendPlaceholder, recommendPlaceholder, recommendPlaceholder)
-        _popularList.value = listOf(popularPlaceholder, popularPlaceholder, popularPlaceholder)
-        _welfareList.value = listOf(policyPlaceholder, policyPlaceholder, policyPlaceholder)
     }
 
     private fun fetchLocalWelfareData() {
@@ -45,16 +39,27 @@ class MainViewModel : ViewModel() {
                 response: Response<List<LocalWelfareServiceDto>>
             ) {
                 if (response.isSuccessful) {
-                    // ✨ [변경] 이제 오직 welfareList만 실제 데이터로 업데이트합니다.
-                    _welfareList.value = response.body()
-                    Log.d("MainViewModel", "성공: '지역별 지원 정책' 데이터를 업데이트했습니다.")
+                    val policyList = response.body()
+                    if (!policyList.isNullOrEmpty()) {
+                        // 전체 목록 저장
+                        _welfareList.value = policyList
+
+                        // 받아온 정책 리스트를 'region'을 기준으로 그룹핑
+                        val groupedData = policyList.groupBy { it.region ?: "기타" }
+                        _groupedWelfareData.value = groupedData
+
+                        // 그룹핑된 데이터에서 지역 이름(Key)만 뽑아서 리스트 생성
+                        _regionList.value = groupedData.keys.sorted()
+
+                        Log.d("MainViewModel", "성공: 데이터를 지역별로 그룹핑했습니다.")
+                    }
                 } else {
-                    Log.e("MainViewModel", "오류: ${response.code()}.")
+                    Log.e("MainViewModel", "오류: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<List<LocalWelfareServiceDto>>, t: Throwable) {
-                Log.e("MainViewModel", "실패: ${t.message}.")
+                Log.e("MainViewModel", "실패: ${t.message}")
             }
         })
     }

@@ -6,17 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.exitsw.R
 import com.example.exitsw.databinding.FragmentMainBinding
 
 class MainFragment : Fragment() {
 
         private var _binding: FragmentMainBinding? = null
         private val binding get() = _binding!!
-        private val viewModel: MainViewModel by viewModels()
+        // activityViewModels()를 사용해 MainActivity의 ViewModel을 공유
+        private val viewModel: MainViewModel by activityViewModels()
 
-        // ✨ [변경] 어댑터를 3개 선언
+        // 3개의 목록을 위한 어댑터 변수 선언
         private lateinit var recommendAdapter: HomeCardAdapter
         private lateinit var popularAdapter: HomeCardAdapter
         private lateinit var policyAdapter: HomeCardAdapter
@@ -32,25 +34,40 @@ class MainFragment : Fragment() {
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
                 super.onViewCreated(view, savedInstanceState)
 
-                setupRecyclerViews() // RecyclerView 설정 함수 호출
+                setupRecyclerViews()
+                setupClickListeners()
+                observeViewModel()
+        }
 
-                // 1. 지역별 지원 정책 데이터 관찰 및 어댑터에 전달
-                viewModel.welfareList.observe(viewLifecycleOwner) { welfareList ->
-                        policyAdapter.submitList(welfareList)
-                }
-
-                // ✨ [추가] 2. 추천 상품 데이터 관찰 및 어댑터에 전달
+        // ViewModel의 데이터 변화를 관찰하는 함수
+        private fun observeViewModel() {
+                // 1. 추천 상품 데이터 관찰 및 어댑터에 전달
                 viewModel.recommendList.observe(viewLifecycleOwner) { recommendList ->
                         recommendAdapter.submitList(recommendList)
                 }
 
-                // ✨ [추가] 3. 인기 상품 데이터 관찰 및 어댑터에 전달
+                // 2. 인기 상품 데이터 관찰 및 어댑터에 전달
                 viewModel.popularList.observe(viewLifecycleOwner) { popularList ->
                         popularAdapter.submitList(popularList)
                 }
+
+                // 3. 지역별 지원 정책 데이터 관찰 및 어댑터에 전달
+                viewModel.welfareList.observe(viewLifecycleOwner) { welfareList ->
+                        policyAdapter.submitList(welfareList)
+                }
         }
 
-        // ✨ [변경] 3개의 RecyclerView를 모두 설정하는 함수
+        // 클릭 리스너를 설정하는 함수
+        private fun setupClickListeners() {
+                binding.textPolicyTitle.setOnClickListener {
+                        parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, RegionListFragment())
+                                .addToBackStack(null) // 뒤로가기 버튼으로 돌아올 수 있도록 스택에 추가
+                                .commit()
+                }
+        }
+
+        // 3개의 RecyclerView를 모두 설정하는 함수
         private fun setupRecyclerViews() {
                 // 어댑터 인스턴스 생성
                 recommendAdapter = HomeCardAdapter()
@@ -76,6 +93,7 @@ class MainFragment : Fragment() {
                 }
         }
 
+        // Fragment가 파괴될 때 메모리 누수를 방지하기 위해 binding을 null로 설정
         override fun onDestroyView() {
                 super.onDestroyView()
                 _binding = null

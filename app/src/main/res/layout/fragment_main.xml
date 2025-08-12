@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- ✨ [수정] 사라졌던 상단 배너 ConstraintLayout -->
+            <!-- 상단 배너 ConstraintLayout -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -141,6 +141,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/textPolicyTitle"
                     android:text="지역별 지원 정책 ➔"
                     android:textSize="18sp"
                     android:textStyle="bold"
