@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,18 +10,75 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none">
+        android:scrollbars="none"
+        android:background="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 상단 배너 섹션 -->
+            <!-- ✨ [수정] 사라졌던 상단 배너 ConstraintLayout -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="220dp">
-                <!-- ... (이전과 동일한 배너 코드) ... -->
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/bannerImage"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/banner"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintDimensionRatio="H,16:9"/>
+
+                <ImageButton
+                    android:id="@+id/btn_profile"
+                    style="@style/NoBackground_ImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_ai"
+                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="10dp"/>
+
+                <ImageButton
+                    android:id="@+id/btn_notification"
+                    style="@style/NoBackground_ImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_policy"
+                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
+                    app:layout_constraintEnd_toStartOf="@+id/btn_settings"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp" />
+
+                <ImageButton
+                    android:id="@+id/btn_settings"
+                    style="@style/NoBackground_ImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_home"
+                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/todayDateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="비상구"
+                    android:textColor="#FFFFFF"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/bannerImage"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginBottom="12dp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- 추천 상품 섹션 -->
@@ -39,7 +97,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- ✨ [변경] RecyclerView로 변경 -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recommendRecyclerView"
                     android:layout_width="match_parent"
@@ -66,7 +123,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- ✨ [변경] RecyclerView로 변경 -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/popularRecyclerView"
                     android:layout_width="match_parent"
@@ -93,7 +149,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- ✨ [변경] ID 수정 -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/policyRecyclerView"
                     android:layout_width="match_parent"
@@ -102,7 +157,6 @@
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_home_card"
                     tools:itemCount="3"/>
-
             </LinearLayout>
 
         </LinearLayout>
