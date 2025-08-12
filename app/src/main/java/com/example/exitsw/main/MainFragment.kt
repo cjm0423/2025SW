@@ -41,6 +41,7 @@ class MainFragment : Fragment() {
 
         // ViewModel의 데이터 변화를 관찰하는 함수
         private fun observeViewModel() {
+                /*
                 // 1. 추천 상품 데이터 관찰 및 어댑터에 전달
                 viewModel.recommendList.observe(viewLifecycleOwner) { recommendList ->
                         recommendAdapter.submitList(recommendList)
@@ -50,7 +51,7 @@ class MainFragment : Fragment() {
                 viewModel.popularList.observe(viewLifecycleOwner) { popularList ->
                         popularAdapter.submitList(popularList)
                 }
-
+                */
                 // 3. 지역별 지원 정책 데이터 관찰 및 어댑터에 전달
                 viewModel.welfareList.observe(viewLifecycleOwner) { welfareList ->
                         policyAdapter.submitList(welfareList)
