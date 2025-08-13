@@ -29,8 +29,9 @@ class RegionListFragment : Fragment() {
 
         setupRecyclerView()
 
-        viewModel.regionList.observe(viewLifecycleOwner) { regionList ->
-            regionAdapter.submitList(regionList)
+        // ViewModel의 지역 정보 목록(regionInfoList)을 관찰
+        viewModel.regionInfoList.observe(viewLifecycleOwner) { regionInfoList ->
+            regionAdapter.submitList(regionInfoList)
         }
 
         binding.toolbar.setNavigationOnClickListener {
@@ -40,10 +41,10 @@ class RegionListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         // 어댑터를 생성할 때, 클릭 시 동작할 람다 함수를 전달
-        regionAdapter = RegionAdapter { regionName ->
+        regionAdapter = RegionAdapter { regionInfo ->
             // 클릭된 지역의 이름을 담아 PolicyListFragment로 전환
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, PolicyListFragment.newInstance(regionName))
+                .replace(R.id.fragment_container, PolicyListFragment.newInstance(regionInfo.name))
                 .addToBackStack(null)
                 .commit()
         }

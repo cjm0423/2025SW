@@ -52,5 +52,18 @@
             app:layout_constraintTop_toBottomOf="@id/textRegionName"
             app:layout_constraintEnd_toEndOf="parent"/>
 
+        <!-- ✨ [수정] 정책 개수 또는 상태 메시지를 표시할 TextView -->
+        <TextView
+            android:id="@+id/textPolicyCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            tools:text="12개 정책"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/textRegionInfo"
+            app:layout_constraintTop_toBottomOf="@id/textRegionInfo"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

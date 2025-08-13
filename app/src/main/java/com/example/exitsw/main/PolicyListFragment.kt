@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyListBinding
 
@@ -40,21 +40,16 @@ class PolicyListFragment : Fragment() {
         setupRecyclerView()
         setupToolbar()
 
-        // 1. API 응답을 기다리는 동안 플레이схолдер를 먼저 보여줍니다.
         showPlaceholderData()
 
-        // 2. ViewModel의 그룹핑된 데이터 전체를 관찰
         viewModel.groupedWelfareData.observe(viewLifecycleOwner) { groupedData ->
             val policyList = groupedData[selectedRegion]
             if (policyList != null) {
-                // 실제 데이터가 있으면 플레이схолдер를 대체
                 policyAdapter.submitList(policyList)
             }
-            // 데이터가 없다면 (API 로딩 전이거나 실패 시) 플레이схолдер가 계속 보임
         }
     }
 
-    // 플레이схолдер 데이터를 보여주는 함수
     private fun showPlaceholderData() {
         val placeholder = LocalWelfareServiceDto("LOADING", "로딩 중...", "데이터를 불러오고 있습니다.", null, null, null, null)
         policyAdapter.submitList(listOf(placeholder, placeholder, placeholder, placeholder, placeholder))
@@ -68,9 +63,15 @@ class PolicyListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        policyAdapter = PolicyAdapter()
+        // ✨ [핵심 수정] 어댑터를 생성할 때, 클릭 시 동작할 람다 함수를 전달
+        policyAdapter = PolicyAdapter { policy ->
+            // 클릭된 정책 데이터를 담아 PolicyDetailFragment로 전환
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, PolicyDetailFragment.newInstance(policy))
+                .addToBackStack(null)
+                .commit()
+        }
         binding.policyRecyclerView.adapter = policyAdapter
-        binding.policyRecyclerView.layoutManager = LinearLayoutManager(context)
     }
 
     override fun onDestroyView() {

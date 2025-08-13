@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.exitsw.data.LocalWelfareServiceDto
+import com.example.exitsw.data.RegionInfo
 import com.example.exitsw.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,8 +28,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _groupedWelfareData = MutableLiveData<Map<String, List<LocalWelfareServiceDto>>>()
     val groupedWelfareData: LiveData<Map<String, List<LocalWelfareServiceDto>>> get() = _groupedWelfareData
 
-    private val _regionList = MutableLiveData<List<String>>()
-    val regionList: LiveData<List<String>> get() = _regionList
+    private val _regionInfoList = MutableLiveData<List<RegionInfo>>()
+    val regionInfoList: LiveData<List<RegionInfo>> get() = _regionInfoList
 
 
     init {
@@ -37,11 +38,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadStaticData() {
-        val placeholder = LocalWelfareServiceDto("LOADING", "로딩 중...", "데이터를 불러오는 중", null, null, null, null)
-        _recommendList.value = listOf(placeholder, placeholder, placeholder, placeholder, placeholder)
-        _popularList.value = listOf(placeholder, placeholder, placeholder, placeholder, placeholder)
-
-        // ✨ [핵심 수정] API 호출과 상관없이 항상 보여줄 전국 팔도 목록
+        // API 호출과 상관없이 항상 보여줄 서울시 + 9개 도 목록
         val staticRegions = listOf(
             "서울시", "경기도", "강원도", "충청북도", "충청남도",
             "전라북도", "전라남도", "경상북도", "경상남도", "제주도"
@@ -55,11 +52,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 summary = null, region = regionName, city = null, detailLink = null
             )
         }
-        // 전체 지역 목록 화면용 String 리스트
-        _regionList.value = staticRegions
+        // 전체 지역 목록 화면용 RegionInfo 리스트 (초기값: 로딩 중)
+        _regionInfoList.value = staticRegions.map { RegionInfo(name = it, policyCount = null) }
+
+        // 추천/인기 상품 플레이스홀더
+        val placeholder = LocalWelfareServiceDto("LOADING", "연결 확인 중...", "", null, null, null, null)
+        _recommendList.value = listOf(placeholder, placeholder, placeholder)
+        _popularList.value = listOf(placeholder, placeholder, placeholder)
     }
 
-    // ✨ [핵심 수정] API에서 오는 다양한 지역명을 표준화하는 함수
     private fun normalizeRegion(apiRegion: String?): String {
         return when {
             apiRegion == null -> "기타"
@@ -73,7 +74,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             apiRegion.contains("경북") || apiRegion.contains("경상북도") || apiRegion.contains("대구") -> "경상북도"
             apiRegion.contains("경남") || apiRegion.contains("경상남도") || apiRegion.contains("부산") || apiRegion.contains("울산") -> "경상남도"
             apiRegion.contains("제주") -> "제주도"
-            else -> "기타" // 인천, 대전, 세종 등은 기타로 분류
+            else -> "기타"
         }
     }
 
@@ -88,18 +89,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful) {
                     val policyList = response.body()
                     if (policyList != null) {
-                        // ✨ [핵심 수정] 표준화된 지역명으로 데이터를 그룹핑합니다.
                         val groupedData = policyList.groupBy { normalizeRegion(it.region) }
                         _groupedWelfareData.value = groupedData
-                        // API 성공 시, 실제 데이터가 있는 지역 목록으로만 갱신
-                        _regionList.value = groupedData.keys.sorted()
-                        Log.d("MainViewModel", "성공: 데이터를 지역별로 그룹핑했습니다.")
+
+                        // API 성공 시, 정책 개수를 포함한 RegionInfo 리스트로 갱신
+                        val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
+                        _regionInfoList.value = currentRegions.map { regionName ->
+                            RegionInfo(name = regionName, policyCount = groupedData[regionName]?.size ?: 0)
+                        }
+
+                        // 추천/인기 상품 상태 업데이트 (예시)
+                        val successPlaceholder = LocalWelfareServiceDto("SUCCESS", "0개 상품", "", null, null, null, null)
+                        _recommendList.value = listOf(successPlaceholder, successPlaceholder, successPlaceholder)
+                        _popularList.value = listOf(successPlaceholder, successPlaceholder, successPlaceholder)
+
+                        Log.d("MainViewModel", "성공: 데이터를 지역별로 그룹핑하고 개수를 업데이트했습니다.")
                     }
+                } else {
+                    onFailure(call, Throwable("Server error with code: ${response.code()}"))
                 }
             }
 
             override fun onFailure(call: Call<List<LocalWelfareServiceDto>>, t: Throwable) {
-                // 실패 시에는 미리 설정된 staticRegions가 그대로 유지됨
+                // 실패 시, 모든 목록을 '연결 실패' 상태로 업데이트
+                val errorPlaceholder = LocalWelfareServiceDto("ERROR", "연결 실패", "", null, null, null, null)
+                _recommendList.value = listOf(errorPlaceholder, errorPlaceholder, errorPlaceholder)
+                _popularList.value = listOf(errorPlaceholder, errorPlaceholder, errorPlaceholder)
+
+                val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
+                _regionInfoList.value = currentRegions.map { RegionInfo(name = it, policyCount = -1) }
+
                 Log.e("MainViewModel", "실패: ${t.message}")
             }
         })

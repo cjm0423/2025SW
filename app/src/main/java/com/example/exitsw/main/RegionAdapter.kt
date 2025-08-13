@@ -5,9 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.exitsw.data.RegionInfo
 import com.example.exitsw.databinding.ItemRegionBinding
 
-class RegionAdapter(private val onItemClicked: (String) -> Unit) : ListAdapter<String, RegionAdapter.RegionViewHolder>(DiffCallback) {
+class RegionAdapter(private val onItemClicked: (RegionInfo) -> Unit) : ListAdapter<RegionInfo, RegionAdapter.RegionViewHolder>(DiffCallback) {
 
     inner class RegionViewHolder(private val binding: ItemRegionBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -15,8 +16,24 @@ class RegionAdapter(private val onItemClicked: (String) -> Unit) : ListAdapter<S
                 onItemClicked(getItem(adapterPosition))
             }
         }
-        fun bind(regionName: String) {
-            binding.textRegionName.text = regionName
+        fun bind(regionInfo: RegionInfo) {
+            binding.textRegionName.text = regionInfo.name
+
+            // ✨ [핵심 수정] policyCount의 상태에 따라 다른 텍스트를 표시
+            when (val count = regionInfo.policyCount) {
+                null -> { // null이면 로딩 중
+                    binding.textPolicyCount.text = "개수 확인 중..."
+                    binding.textPolicyCount.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
+                }
+                -1 -> { // -1이면 연결 실패
+                    binding.textPolicyCount.text = "연결 실패"
+                    binding.textPolicyCount.setTextColor(itemView.context.getColor(android.R.color.holo_red_dark))
+                }
+                else -> { // 0 이상이면 실제 개수
+                    binding.textPolicyCount.text = "${count}개 정책"
+                    binding.textPolicyCount.setTextColor(itemView.context.getColor(android.R.color.holo_blue_dark))
+                }
+            }
         }
     }
 
@@ -30,11 +47,11 @@ class RegionAdapter(private val onItemClicked: (String) -> Unit) : ListAdapter<S
     }
 
     companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<String>() {
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
-                return oldItem == newItem
+        private val DiffCallback = object : DiffUtil.ItemCallback<RegionInfo>() {
+            override fun areItemsTheSame(oldItem: RegionInfo, newItem: RegionInfo): Boolean {
+                return oldItem.name == newItem.name
             }
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+            override fun areContentsTheSame(oldItem: RegionInfo, newItem: RegionInfo): Boolean {
                 return oldItem == newItem
             }
         }
