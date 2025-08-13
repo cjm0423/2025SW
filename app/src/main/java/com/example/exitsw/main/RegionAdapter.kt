@@ -7,9 +7,14 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.databinding.ItemRegionBinding
 
-class RegionAdapter : ListAdapter<String, RegionAdapter.RegionViewHolder>(DiffCallback) {
+class RegionAdapter(private val onItemClicked: (String) -> Unit) : ListAdapter<String, RegionAdapter.RegionViewHolder>(DiffCallback) {
 
     inner class RegionViewHolder(private val binding: ItemRegionBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            itemView.setOnClickListener {
+                onItemClicked(getItem(adapterPosition))
+            }
+        }
         fun bind(regionName: String) {
             binding.textRegionName.text = regionName
         }
@@ -29,7 +34,6 @@ class RegionAdapter : ListAdapter<String, RegionAdapter.RegionViewHolder>(DiffCa
             override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
                 return oldItem == newItem
             }
-
             override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
                 return oldItem == newItem
             }

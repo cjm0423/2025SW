@@ -8,36 +8,38 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.ItemHomeCardBinding
 
-class HomeCardAdapter : ListAdapter<LocalWelfareServiceDto, HomeCardAdapter.HomeCardViewHolder>(DiffCallback) {
+// ✨ [변경] 생성자에 클릭 리스너를 받도록 추가
+class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit) : ListAdapter<LocalWelfareServiceDto, HomeCardAdapter.HomeCardViewHolder>(DiffCallback) {
 
-    // ViewHolder: 각 카드 아이템의 뷰를 보관하는 홀더
     inner class HomeCardViewHolder(private val binding: ItemHomeCardBinding) : RecyclerView.ViewHolder(binding.root) {
-        // 데이터를 뷰에 바인딩하는 함수
+        // ✨ [추가] ViewHolder가 생성될 때 클릭 리스너를 설정
+        init {
+            itemView.setOnClickListener {
+                // 현재 위치의 아이템을 클릭 리스너에 전달
+                onItemClicked(getItem(adapterPosition))
+            }
+        }
+
         fun bind(item: LocalWelfareServiceDto) {
-            binding.textCardTitle.text = item.serviceName
-            binding.textCardSubtitle.text = item.department
-            // TODO: 이미지 로딩 라이브러리(Glide, Coil 등)를 사용해 이미지 설정
+            binding.textCardTitle.text = item.serviceName ?: "정보 없음"
+            binding.textCardSubtitle.text = item.department ?: ""
         }
     }
 
-    // ViewHolder가 생성될 때 호출
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeCardViewHolder {
         val binding = ItemHomeCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return HomeCardViewHolder(binding)
     }
 
-    // ViewHolder에 데이터가 바인딩될 때 호출
     override fun onBindViewHolder(holder: HomeCardViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    // DiffUtil: 리스트가 변경될 때 효율적으로 업데이트하기 위한 콜백
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<LocalWelfareServiceDto>() {
             override fun areItemsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
                 return oldItem.serviceId == newItem.serviceId
             }
-
             override fun areContentsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
                 return oldItem == newItem
             }

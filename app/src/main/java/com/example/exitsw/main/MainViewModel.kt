@@ -1,37 +1,67 @@
 package com.example.exitsw.main
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    // 1. 데이터를 지역별로 묶어서 저장할 LiveData
-    // 예: { "서울시": [정책1, 정책2], "강원도": [정책3] }
+    // 홈 화면 카드 목록을 위한 LiveData
+    private val _recommendList = MutableLiveData<List<LocalWelfareServiceDto>>()
+    val recommendList: LiveData<List<LocalWelfareServiceDto>> get() = _recommendList
+
+    private val _popularList = MutableLiveData<List<LocalWelfareServiceDto>>()
+    val popularList: LiveData<List<LocalWelfareServiceDto>> get() = _popularList
+
+    // ✨ [변경] 홈 화면 미리보기용 "지역 목록" LiveData
+    private val _homeRegionPreviewList = MutableLiveData<List<LocalWelfareServiceDto>>()
+    val homeRegionPreviewList: LiveData<List<LocalWelfareServiceDto>> get() = _homeRegionPreviewList
+
+    // 지역 목록 화면을 위한 LiveData
     private val _groupedWelfareData = MutableLiveData<Map<String, List<LocalWelfareServiceDto>>>()
     val groupedWelfareData: LiveData<Map<String, List<LocalWelfareServiceDto>>> get() = _groupedWelfareData
 
-    // 2. 지역 이름 목록만 따로 저장할 LiveData
     private val _regionList = MutableLiveData<List<String>>()
     val regionList: LiveData<List<String>> get() = _regionList
 
-    // 3. 홈 화면 미리보기를 위한 전체 목록 LiveData (필요 시 사용)
-    private val _welfareList = MutableLiveData<List<LocalWelfareServiceDto>>()
-    val welfareList: LiveData<List<LocalWelfareServiceDto>> get() = _welfareList
-
 
     init {
+        loadStaticData()
         fetchLocalWelfareData()
     }
 
+    private fun loadStaticData() {
+        val placeholder = LocalWelfareServiceDto("LOADING", "로딩 중...", "데이터를 불러오는 중", null, null, null, null)
+        _recommendList.value = listOf(placeholder, placeholder, placeholder)
+        _popularList.value = listOf(placeholder, placeholder, placeholder)
+
+        // ✨ [핵심 수정] API 호출과 상관없이 항상 보여줄 전국 팔도 목록
+        val staticRegions = listOf(
+            "서울시", "경기도", "강원도", "충청북도", "충청남도",
+            "전라북도", "전라남도", "경상북도", "경상남도", "제주도"
+        )
+        // 홈 화면 미리보기용 DTO 생성
+        _homeRegionPreviewList.value = staticRegions.map { regionName ->
+            LocalWelfareServiceDto(
+                serviceId = regionName, // ID로 지역 이름을 임시 사용
+                serviceName = regionName,
+                department = "정책 목록 보기",
+                summary = null, region = regionName, city = null, detailLink = null
+            )
+        }
+        // 전체 지역 목록 화면용 String 리스트
+        _regionList.value = staticRegions
+    }
+
     private fun fetchLocalWelfareData() {
-        val call = RetrofitClient.instance.getLocalWelfareList(sigunguCd = "")
+        val call = RetrofitClient.getInstance(getApplication()).getLocalWelfareList(sigunguCd = "")
 
         call.enqueue(object : Callback<List<LocalWelfareServiceDto>> {
             override fun onResponse(
@@ -40,25 +70,18 @@ class MainViewModel : ViewModel() {
             ) {
                 if (response.isSuccessful) {
                     val policyList = response.body()
-                    if (!policyList.isNullOrEmpty()) {
-                        // 전체 목록 저장
-                        _welfareList.value = policyList
-
-                        // 받아온 정책 리스트를 'region'을 기준으로 그룹핑
+                    if (policyList != null) {
                         val groupedData = policyList.groupBy { it.region ?: "기타" }
                         _groupedWelfareData.value = groupedData
-
-                        // 그룹핑된 데이터에서 지역 이름(Key)만 뽑아서 리스트 생성
+                        // ✨ API 성공 시, 실제 데이터가 있는 지역 목록으로만 갱신
                         _regionList.value = groupedData.keys.sorted()
-
                         Log.d("MainViewModel", "성공: 데이터를 지역별로 그룹핑했습니다.")
                     }
-                } else {
-                    Log.e("MainViewModel", "오류: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<List<LocalWelfareServiceDto>>, t: Throwable) {
+                // 실패 시에는 미리 설정된 staticRegions가 그대로 유지됨
                 Log.e("MainViewModel", "실패: ${t.message}")
             }
         })

@@ -3,7 +3,9 @@
     package="com.example.exitsw"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- 권한은 그대로 유지 -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:name=".GlobalApplication"
@@ -15,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExitSW"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
         <!-- Kakao SDK App Key -->
@@ -36,15 +39,10 @@
             </intent-filter>
         </activity>
 
-        <!-- 런처 액티비티: 로그인 화면으로 지정 -->
+        <!-- ✨ [변경] 런처 액티비티가 아니므로 exported="false"로 변경 -->
         <activity
             android:name=".LoginActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+            android:exported="false" />
 
 
         <!-- 회원가입 화면 -->
@@ -52,10 +50,15 @@
             android:name=".SignupActivity"
             android:exported="false" />
 
-        <!-- 메인 화면 -->
+        <!-- ✨ [변경] 메인 화면을 임시 런처 액티비티로 지정 -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
     </application>
 </manifest>
