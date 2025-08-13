@@ -20,9 +20,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _popularList = MutableLiveData<List<LocalWelfareServiceDto>>()
     val popularList: LiveData<List<LocalWelfareServiceDto>> get() = _popularList
 
-    // ✨ [변경] 홈 화면 미리보기용 "지역 목록" LiveData
-    private val _homeRegionPreviewList = MutableLiveData<List<LocalWelfareServiceDto>>()
-    val homeRegionPreviewList: LiveData<List<LocalWelfareServiceDto>> get() = _homeRegionPreviewList
+    private val _homeRegionList = MutableLiveData<List<LocalWelfareServiceDto>>()
+    val homeRegionList: LiveData<List<LocalWelfareServiceDto>> get() = _homeRegionList
 
     // 지역 목록 화면을 위한 LiveData
     private val _groupedWelfareData = MutableLiveData<Map<String, List<LocalWelfareServiceDto>>>()
@@ -39,8 +38,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadStaticData() {
         val placeholder = LocalWelfareServiceDto("LOADING", "로딩 중...", "데이터를 불러오는 중", null, null, null, null)
-        _recommendList.value = listOf(placeholder, placeholder, placeholder)
-        _popularList.value = listOf(placeholder, placeholder, placeholder)
+        _recommendList.value = listOf(placeholder, placeholder, placeholder, placeholder, placeholder)
+        _popularList.value = listOf(placeholder, placeholder, placeholder, placeholder, placeholder)
 
         // ✨ [핵심 수정] API 호출과 상관없이 항상 보여줄 전국 팔도 목록
         val staticRegions = listOf(
@@ -48,7 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             "전라북도", "전라남도", "경상북도", "경상남도", "제주도"
         )
         // 홈 화면 미리보기용 DTO 생성
-        _homeRegionPreviewList.value = staticRegions.map { regionName ->
+        _homeRegionList.value = staticRegions.map { regionName ->
             LocalWelfareServiceDto(
                 serviceId = regionName, // ID로 지역 이름을 임시 사용
                 serviceName = regionName,
@@ -58,6 +57,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         // 전체 지역 목록 화면용 String 리스트
         _regionList.value = staticRegions
+    }
+
+    // ✨ [핵심 수정] API에서 오는 다양한 지역명을 표준화하는 함수
+    private fun normalizeRegion(apiRegion: String?): String {
+        return when {
+            apiRegion == null -> "기타"
+            apiRegion.contains("서울") -> "서울시"
+            apiRegion.contains("경기") -> "경기도"
+            apiRegion.contains("강원") -> "강원도"
+            apiRegion.contains("충북") || apiRegion.contains("충청북도") -> "충청북도"
+            apiRegion.contains("충남") || apiRegion.contains("충청남도") -> "충청남도"
+            apiRegion.contains("전북") || apiRegion.contains("전라북도") -> "전라북도"
+            apiRegion.contains("전남") || apiRegion.contains("전라남도") || apiRegion.contains("광주") -> "전라남도"
+            apiRegion.contains("경북") || apiRegion.contains("경상북도") || apiRegion.contains("대구") -> "경상북도"
+            apiRegion.contains("경남") || apiRegion.contains("경상남도") || apiRegion.contains("부산") || apiRegion.contains("울산") -> "경상남도"
+            apiRegion.contains("제주") -> "제주도"
+            else -> "기타" // 인천, 대전, 세종 등은 기타로 분류
+        }
     }
 
     private fun fetchLocalWelfareData() {
@@ -71,9 +88,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful) {
                     val policyList = response.body()
                     if (policyList != null) {
-                        val groupedData = policyList.groupBy { it.region ?: "기타" }
+                        // ✨ [핵심 수정] 표준화된 지역명으로 데이터를 그룹핑합니다.
+                        val groupedData = policyList.groupBy { normalizeRegion(it.region) }
                         _groupedWelfareData.value = groupedData
-                        // ✨ API 성공 시, 실제 데이터가 있는 지역 목록으로만 갱신
+                        // API 성공 시, 실제 데이터가 있는 지역 목록으로만 갱신
                         _regionList.value = groupedData.keys.sorted()
                         Log.d("MainViewModel", "성공: 데이터를 지역별로 그룹핑했습니다.")
                     }

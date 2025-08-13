@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyListBinding
 
@@ -39,7 +40,7 @@ class PolicyListFragment : Fragment() {
         setupRecyclerView()
         setupToolbar()
 
-        // 1. API 응답을 기다리는 동안 플레이스홀더를 먼저 보여줍니다.
+        // 1. API 응답을 기다리는 동안 플레이схолдер를 먼저 보여줍니다.
         showPlaceholderData()
 
         // 2. ViewModel의 그룹핑된 데이터 전체를 관찰
@@ -69,6 +70,7 @@ class PolicyListFragment : Fragment() {
     private fun setupRecyclerView() {
         policyAdapter = PolicyAdapter()
         binding.policyRecyclerView.adapter = policyAdapter
+        binding.policyRecyclerView.layoutManager = LinearLayoutManager(context)
     }
 
     override fun onDestroyView() {

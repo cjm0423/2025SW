@@ -42,7 +42,8 @@ class MainFragment : Fragment() {
                 viewModel.popularList.observe(viewLifecycleOwner) { list ->
                         popularAdapter.submitList(list)
                 }
-                viewModel.homeRegionPreviewList.observe(viewLifecycleOwner) { list ->
+                // 홈 화면 미리보기용 지역 목록을 관찰
+                viewModel.homeRegionList.observe(viewLifecycleOwner) { list ->
                         policyAdapter.submitList(list)
                 }
         }
