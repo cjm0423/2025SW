@@ -8,11 +8,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 @JacksonXmlRootElement(localName = "wantedList")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class LocalWelfareListResponse(
-    @JacksonXmlProperty(localName = "resultCode")    val resultCode: String,
-    @JacksonXmlProperty(localName = "resultMessage") val resultMessage: String,
-    @JacksonXmlProperty(localName = "numOfRows")     val numOfRows: Int,
-    @JacksonXmlProperty(localName = "pageNo")        val pageNo: Int,
-    @JacksonXmlProperty(localName = "totalCount")    val totalCount: Int,
+    @JacksonXmlProperty(localName = "resultCode")    val resultCode: String?,
+    @JacksonXmlProperty(localName = "resultMessage") val resultMessage: String?,
+    @JacksonXmlProperty(localName = "numOfRows")     val numOfRows: Int?,
+    @JacksonXmlProperty(localName = "pageNo")        val pageNo: Int?,
+    @JacksonXmlProperty(localName = "totalCount")    val totalCount: Int?,
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "servList")       
     val servList: List<LocalWelfareService> = emptyList()
@@ -40,8 +40,8 @@ data class LocalWelfareService(
 @JacksonXmlRootElement(localName = "wantedDtl")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class LocalWelfareDetailResponse(
-    @JacksonXmlProperty(localName = "resultCode")           val resultCode: String,
-    @JacksonXmlProperty(localName = "resultMessage")        val resultMessage: String,
+    @JacksonXmlProperty(localName = "resultCode")           val resultCode: String?,
+    @JacksonXmlProperty(localName = "resultMessage")        val resultMessage: String?,
     @JacksonXmlProperty(localName = "servId")               val servId: String,
     @JacksonXmlProperty(localName = "servNm")               val servNm: String,
     @JacksonXmlProperty(localName = "enfcBgngYmd")          val enfcBgngYmd: String?,

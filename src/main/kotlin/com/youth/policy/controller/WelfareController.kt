@@ -88,11 +88,18 @@ class WelfareController(
 
     @GetMapping("/local/services/json", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getLocalWelfareListAsJson(
-        @RequestParam sigunguCd: String,
         @RequestParam(defaultValue = "1") pageNo: Int,
-        @RequestParam(defaultValue = "10") numOfRows: Int
-    ): List<LocalWelfareJsonResponse> {
-        // 4단계에서 만든 서비스 메서드를 호출합니다.
-        return welfareService.getLocalWelfareListAsJson(sigunguCd, pageNo, numOfRows)
+        @RequestParam(defaultValue = "1") numOfRows: Int
+    ): Map<String, LocalWelfareListResponse> {
+        val regionsToSearch = listOf(
+            "1100000", "4100000", "5100000", "4300000", "4400000",
+            "4500000", "4600000", "4700000", "4800000", "5000000"
+        )
+        println("JSON 통합 복지 서비스 목록 API 호출됨 - 각 지역별 ${numOfRows}개")
+        return welfareService.getLocalWelfareListByRegions(
+            sigunguCdList = regionsToSearch,
+            pageNo = pageNo,
+            numOfRows = numOfRows
+        )
     }
 }
