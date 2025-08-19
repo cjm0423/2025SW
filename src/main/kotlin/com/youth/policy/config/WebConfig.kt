@@ -28,9 +28,6 @@ class WebConfig {
     @Bean
     fun restTemplate(xmlMapper: XmlMapper): RestTemplate {
         val restTemplate = RestTemplate()
-        val xmlConverter = MappingJackson2XmlHttpMessageConverter(xmlMapper)
-
-        restTemplate.messageConverters.add(0, xmlConverter)
 
         restTemplate.interceptors = listOf(
             UserAgentInterceptor(),

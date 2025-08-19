@@ -78,7 +78,6 @@ class LocalWelfareClient(
         return UriComponentsBuilder
             .fromHttpUrl(listApiUrl)
             .queryParam("serviceKey", key)
-            .queryParam("callTp", "L")
             .queryParam("sigunguCd", req.sigunguCd)
             .queryParam("pageNo", req.pageNo)
             .queryParam("numOfRows", req.numOfRows)

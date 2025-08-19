@@ -67,8 +67,16 @@ class WelfareController(
     @GetMapping("/local/services/representatives", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getRepresentativeWelfareList(): List<LocalWelfareJsonResponse> {
         val regionsToSearch = listOf(
-            "1100000", "4100000", "5100000", "4300000", "4400000",
-            "4500000", "4600000", "4700000", "4800000", "5000000"
+            "1111000" // 서울특별시
+            // "4100000", // 경기도
+            // "5100000", // 강원특별자치도
+            // "4300000", // 충청북도
+            // "4400000", // 충청남도
+            // "4500000", // 전북특별자치도
+            // "4600000", // 전라남도
+            // "4700000", // 경상북도
+            // "4800000", // 경상남도
+            // "5000000"  // 제주특별자치도
         )
         return welfareService.getRepresentativeWelfareListByRegions(regionsToSearch)
     }

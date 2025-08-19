@@ -64,7 +64,7 @@ class WelfareService(
             try {
                 Thread.sleep(1000)
 
-                val response = getLocalWelfareList(sigunguCd, pageNo = 1, numOfRows = 1)
+                val response = getLocalWelfareList(sigunguCd, pageNo = 1, numOfRows = 5)
                 response.servList.firstOrNull()?.let { serv ->
                     val welfareJson = LocalWelfareJsonResponse(
                         serviceId = serv.servId,
