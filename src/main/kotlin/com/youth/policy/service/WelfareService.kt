@@ -4,8 +4,6 @@ import com.youth.policy.client.WelfareClient
 import com.youth.policy.client.LocalWelfareClient
 import com.youth.policy.model.*
 import org.springframework.stereotype.Service
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 @Service
 class WelfareService(
@@ -59,35 +57,30 @@ class WelfareService(
         return localClient.getLocalWelfareDetail(req)
     }
 
-    // ─── 추가된 메서드: 여러 시군구코드를 한 번에 조회 후 그룹핑 ───
-    fun getLocalWelfareListByRegions(
-        sigunguCdList: List<String>,
-        pageNo: Int = 1,
-        numOfRows: Int = 10
-    ): Map<String, LocalWelfareListResponse> {
-        return sigunguCdList.associateWith { code ->
-            val req = LocalWelfareListRequest(sigunguCd = code, pageNo = pageNo, numOfRows = numOfRows)
-            localClient.getLocalWelfareList(req)
+    fun getRepresentativeWelfareListByRegions(sigunguCdList: List<String>): List<LocalWelfareJsonResponse> {
+        val representativeList = mutableListOf<LocalWelfareJsonResponse>()
+
+        sigunguCdList.forEach { sigunguCd ->
+            try {
+                Thread.sleep(1000)
+
+                val response = getLocalWelfareList(sigunguCd, pageNo = 1, numOfRows = 1)
+                response.servList.firstOrNull()?.let { serv ->
+                    val welfareJson = LocalWelfareJsonResponse(
+                        serviceId = serv.servId,
+                        serviceName = serv.servNm,
+                        department = serv.bizChrDeptNm,
+                        summary = serv.servDgst,
+                        region = serv.ctpvNm,
+                        city = serv.sggNm,
+                        detailLink = serv.servDtlLink
+                    )
+                    representativeList.add(welfareJson)
+                }
+            } catch (e: Exception) {
+                println("Error fetching welfare list for sigunguCd $sigunguCd: ${e.message}")
+            }
         }
-    }
-
-    fun getLocalWelfareListAsJson(sigunguCd: String, pageNo: Int = 1, numOfRows: Int = 10): List<LocalWelfareJsonResponse> {
-        val req = LocalWelfareListRequest(sigunguCd, pageNo, numOfRows)
-
-        // ✨ [최종 해결책] 가장 안정적으로 동작하는 기존 Client 메서드를 호출합니다.
-        val parsedData: LocalWelfareListResponse = localClient.getLocalWelfareList(req)
-
-        // 안정적으로 받아온 데이터를 우리가 원하는 최종 JSON 형태로 변환합니다.
-        return parsedData.servList.map { serv ->
-            LocalWelfareJsonResponse(
-                serviceId = serv.servId,
-                serviceName = serv.servNm,
-                department = serv.bizChrDeptNm,
-                summary = serv.servDgst,
-                region = serv.ctpvNm,
-                city = serv.sggNm,
-                detailLink = serv.servDtlLink
-            )
-        }
+        return representativeList
     }
 }

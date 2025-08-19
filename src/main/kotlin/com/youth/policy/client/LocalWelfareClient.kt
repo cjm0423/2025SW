@@ -1,5 +1,6 @@
 package com.youth.policy.client
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.youth.policy.exception.QuotaExceededException
 import com.youth.policy.model.*
 import org.springframework.beans.factory.annotation.Value
@@ -13,18 +14,30 @@ import java.nio.charset.StandardCharsets
 @Component
 class LocalWelfareClient(
     private val restTemplate: RestTemplate,
-    @Value("\${welfare.api.local.list.url}")   private val listApiUrl: String,
+    private val xmlMapper: XmlMapper,
+    @Value("\${welfare.api.local.list.url}") private val listApiUrl: String,
     @Value("\${welfare.api.local.detail.url}") private val detailApiUrl: String,
-    @Value("\${welfare.api.local.key}")        private val serviceKey: String
+    @Value("\${welfare.api.local.key}") private val serviceKey: String
 ) {
 
     fun getLocalWelfareList(req: LocalWelfareListRequest): LocalWelfareListResponse {
         val uri = buildListUri(req)
         val rawXml = restTemplate.getForObject(uri, String::class.java)
-            ?: throw RuntimeException("지자체 목록 API 응답이 비어있습니다.")
+
+        if (rawXml.isNullOrBlank()) {
+            println("Warning: API for sigunguCd ${req.sigunguCd} returned an empty response.")
+            return LocalWelfareListResponse(
+                servList = emptyList(),
+                pageNo = req.pageNo,
+                totalCount = 0,
+                numOfRows = req.numOfRows,
+                resultCode = "00",
+                resultMessage = "NORMAL SERVICE."
+            )
+        }
 
         if (rawXml.contains("<cmmMsgHeader>")) {
-            val errorResponse = restTemplate.getForObject(uri, WelfareErrorResponse::class.java)
+            val errorResponse = xmlMapper.readValue(rawXml, WelfareErrorResponse::class.java)
             val errorCode = errorResponse?.cmmMsgHeader?.returnReasonCode
             val errorMessage = errorResponse?.cmmMsgHeader?.returnAuthMsg
 
@@ -34,17 +47,20 @@ class LocalWelfareClient(
             throw RuntimeException("지자체 목록 API 오류: $errorMessage (코드: $errorCode)")
         }
 
-        return restTemplate.getForObject(uri, LocalWelfareListResponse::class.java)
-            ?: throw RuntimeException("지자체 목록 응답이 null입니다.")
+        return xmlMapper.readValue(rawXml, LocalWelfareListResponse::class.java)
     }
 
     fun getLocalWelfareDetail(req: LocalWelfareDetailRequest): LocalWelfareDetailResponse {
         val uri = buildDetailUri(req)
         val rawXml = restTemplate.getForObject(uri, String::class.java)
-            ?: throw RuntimeException("지자체 상세 API 응답이 비어있습니다.")
+
+        if (rawXml.isNullOrBlank()) {
+            println("Warning: API for servId ${req.servId} returned an empty response.")
+            throw RuntimeException("지자체 상세 API가 빈 응답을 반환했습니다: servId=${req.servId}")
+        }
 
         if (rawXml.contains("<cmmMsgHeader>")) {
-            val errorResponse = restTemplate.getForObject(uri, WelfareErrorResponse::class.java)
+            val errorResponse = xmlMapper.readValue(rawXml, WelfareErrorResponse::class.java)
             val errorCode = errorResponse?.cmmMsgHeader?.returnReasonCode
             val errorMessage = errorResponse?.cmmMsgHeader?.returnAuthMsg
 
@@ -54,8 +70,7 @@ class LocalWelfareClient(
             throw RuntimeException("지자체 상세 API 오류: $errorMessage (코드: $errorCode)")
         }
 
-        return restTemplate.getForObject(uri, LocalWelfareDetailResponse::class.java)
-            ?: throw RuntimeException("지자체 상세 응답이 null입니다.")
+        return xmlMapper.readValue(rawXml, LocalWelfareDetailResponse::class.java)
     }
 
     private fun buildListUri(req: LocalWelfareListRequest): URI {
