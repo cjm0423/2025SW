@@ -23,7 +23,6 @@ class ServerStartupListener : ApplicationListener<WebServerInitializedEvent> {
         println("- 중앙부처 복지서비스 목록: http://localhost:$port/api/welfare/services")
         println("- 중앙부처 복지서비스 상세: http://localhost:$port/api/welfare/services/{servID}")
         println("- 지자체 정책 목록: http://localhost:$port/api/welfare/local/services?sigunguCd={sigunguCd}")
-        println("- 지자체 정책 목록 : http://localhost:$port/api/welfare/local/services/representatives")
         println("- 지자체 복지서비스 상세:   http://localhost:$port/api/welfare/local/services/{servId}?sigunguCd={sigunguCd}")
         println()
     }
