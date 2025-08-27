@@ -5,12 +5,11 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.data.RegionInfo
 import com.example.exitsw.network.RetrofitClient
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -78,49 +77,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * 코루틴을 사용하여 API로부터 지역 복지 데이터를 가져옵니다.
+     */
     private fun fetchLocalWelfareData() {
-        val call = RetrofitClient.getInstance(getApplication()).getLocalWelfareList(sigunguCd = "")
+        // viewModelScope.launch를 사용해 코루틴 컨텍스트에서 API를 호출합니다.
+        viewModelScope.launch {
+            try {
+                // 1. API 호출 (suspend 함수는 코루틴 내에서 직접 호출)
+                val response = RetrofitClient.getInstance(getApplication()).getLocalWelfareList(sigunguCd = "")
 
-        call.enqueue(object : Callback<List<LocalWelfareServiceDto>> {
-            override fun onResponse(
-                call: Call<List<LocalWelfareServiceDto>>,
-                response: Response<List<LocalWelfareServiceDto>>
-            ) {
-                if (response.isSuccessful) {
-                    val policyList = response.body()
-                    if (policyList != null) {
-                        val groupedData = policyList.groupBy { normalizeRegion(it.region) }
-                        _groupedWelfareData.value = groupedData
+                // 2. 응답 객체(LocalWelfareListResponse)에서 실제 데이터 리스트(servList)를 추출합니다.
+                val policyList = response.servList
 
-                        // API 성공 시, 정책 개수를 포함한 RegionInfo 리스트로 갱신
-                        val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
-                        _regionInfoList.value = currentRegions.map { regionName ->
-                            RegionInfo(name = regionName, policyCount = groupedData[regionName]?.size ?: 0)
-                        }
+                // 3. 데이터를 지역별로 그룹핑합니다.
+                val groupedData = policyList.groupBy { normalizeRegion(it.region) }
+                _groupedWelfareData.value = groupedData // LiveData 업데이트 (메인 스레드이므로 .value 사용)
 
-                        // 추천/인기 상품 상태 업데이트 (예시)
-                        val successPlaceholder = LocalWelfareServiceDto("SUCCESS", "0개 상품", "", null, null, null, null)
-                        _recommendList.value = listOf(successPlaceholder, successPlaceholder, successPlaceholder)
-                        _popularList.value = listOf(successPlaceholder, successPlaceholder, successPlaceholder)
-
-                        Log.d("MainViewModel", "성공: 데이터를 지역별로 그룹핑하고 개수를 업데이트했습니다.")
-                    }
-                } else {
-                    onFailure(call, Throwable("Server error with code: ${response.code()}"))
+                // 4. API 성공 시, 정책 개수를 포함한 RegionInfo 리스트로 갱신합니다.
+                val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
+                _regionInfoList.value = currentRegions.map { regionName ->
+                    RegionInfo(name = regionName, policyCount = groupedData[regionName]?.size ?: 0)
                 }
-            }
 
-            override fun onFailure(call: Call<List<LocalWelfareServiceDto>>, t: Throwable) {
-                // 실패 시, 모든 목록을 '연결 실패' 상태로 업데이트
-                val errorPlaceholder = LocalWelfareServiceDto("ERROR", "연결 실패", "", null, null, null, null)
+                // 5. 추천/인기 상품 상태를 성공 상태로 업데이트합니다. (예시)
+                //    실제로는 policyList에서 데이터를 가공하여 채워야 합니다.
+                _recommendList.value = policyList.take(3) // 예시: 받아온 리스트의 앞 3개
+                _popularList.value = policyList.shuffled().take(3) // 예시: 받아온 리스트를 섞어서 3개
+
+                Log.d("MainViewModel", "성공: ${policyList.size}개의 데이터를 가져왔습니다.")
+
+            } catch (e: Exception) {
+                // 6. API 호출 실패 또는 예외 발생 시 처리
+                Log.e("MainViewModel", "데이터 로딩 실패: ${e.message}")
+
+                val errorPlaceholder = LocalWelfareServiceDto("ERROR", "연결 실패", e.message, null, null, null, null)
                 _recommendList.value = listOf(errorPlaceholder, errorPlaceholder, errorPlaceholder)
                 _popularList.value = listOf(errorPlaceholder, errorPlaceholder, errorPlaceholder)
 
                 val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
-                _regionInfoList.value = currentRegions.map { RegionInfo(name = it, policyCount = -1) }
-
-                Log.e("MainViewModel", "실패: ${t.message}")
+                _regionInfoList.value = currentRegions.map { RegionInfo(name = it, policyCount = -1) } // -1을 실패 코드로 사용
             }
-        })
+        }
     }
 }
