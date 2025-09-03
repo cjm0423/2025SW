@@ -2,12 +2,12 @@ package com.youth.policy.controller
 
 import com.youth.policy.model.*
 import com.youth.policy.service.WelfareService
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.http.MediaType
 
 @RestController
 @RequestMapping("/api/welfare")
@@ -54,13 +54,15 @@ class WelfareController(
         @RequestParam sigunguCd: String,
         @RequestParam(defaultValue = "1") pageNo: Int,
         @RequestParam(defaultValue = "10") numOfRows: Int
-    ): LocalWelfareListResponse =
-        welfareService.getLocalWelfareList(sigunguCd, pageNo, numOfRows)
+    ): LocalWelfareListResponse {
+        return welfareService.getLocalWelfareList(sigunguCd, pageNo, numOfRows)
+    }
 
     @GetMapping("/local/services/{servId}")
     fun getLocalWelfareDetail(
         @PathVariable servId: String,
         @RequestParam sigunguCd: String
-    ): LocalWelfareDetailResponse =
-        welfareService.getLocalWelfareDetail(sigunguCd, servId)
+    ): LocalWelfareDetailResponse {
+        return welfareService.getLocalWelfareDetail(sigunguCd, servId)
+    }
 }
