@@ -23,7 +23,7 @@
             android:text="비상구"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#000"
+            android:textColor="#000000"
             android:gravity="start"
             android:layout_marginTop="24dp"
             android:layout_marginStart="8dp"/>
@@ -52,7 +52,7 @@
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-2) 생년월일 -->
+        <!-- 2-2) 생년월일 (달력 선택 전용: 클릭만 가능) -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
@@ -69,62 +69,70 @@
                 android:id="@+id/etBirth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="생년월일"
-                android:inputType="date"
+                android:hint="생년월일 (YYYY-MM-DD)"
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none"
                 android:minHeight="48dp"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-3) 주거지 -->
+        <!-- 2-3) 주거지 (시/도 드롭다운) -->
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:maxWidth="360dp"
+            android:hint="주거지 (시/도)"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusBottomEnd="16dp"
-            android:elevation="2dp">
+            android:elevation="2dp"
+            app:endIconMode="dropdown_menu">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAddress"
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/actvRegion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="주거지"
-                android:inputType="textPostalAddress"
+                android:inputType="none"
+                android:entries="@array/kor_regions"
                 android:minHeight="48dp"
                 android:paddingTop="12dp"
-                android:paddingBottom="12dp"/>
+                android:paddingBottom="12dp"
+                tools:ignore="SpeakableTextPresent"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-4) 소득 분위 -->
+        <!-- 2-4) 소득 분위 (드롭다운: 1~10, 차상위) -->
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:maxWidth="360dp"
+            android:hint="소득 분위"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusBottomEnd="16dp"
-            android:elevation="2dp">
+            android:elevation="2dp"
+            app:endIconMode="dropdown_menu">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etIncome"
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/actvIncome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="소득 분위"
-                android:inputType="number"
+                android:inputType="none"
+                android:entries="@array/income_brackets"
                 android:minHeight="48dp"
                 android:paddingTop="12dp"
-                android:paddingBottom="12dp"/>
+                android:paddingBottom="12dp"
+                tools:ignore="SpeakableTextPresent"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-5) 관심 키워드 (ExposedDropdownMenu) -->
+        <!-- 2-5) 관심 키워드 (드롭다운: 리소스 별도 파일) -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
@@ -136,13 +144,15 @@
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusBottomEnd="16dp"
-            android:elevation="2dp">
+            android:elevation="2dp"
+            app:endIconMode="dropdown_menu">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/actvKeyword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textStyle="normal"
+                android:inputType="none"
+                android:entries="@array/interest_keywords"
                 android:minHeight="48dp"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"
@@ -209,10 +219,9 @@
             android:maxWidth="360dp"
             android:backgroundTint="#FEE500"
             android:text="회원 가입"
-            android:textColor="#000"
+            android:textColor="#000000"
             app:cornerRadius="8dp"/>
 
-        <!-- 여백 -->
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp"/>

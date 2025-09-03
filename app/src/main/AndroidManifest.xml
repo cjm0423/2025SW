@@ -42,7 +42,12 @@
         <!-- ✨ [변경] 런처 액티비티가 아니므로 exported="false"로 변경 -->
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
 
         <!-- 회원가입 화면 -->
@@ -53,12 +58,8 @@
         <!-- ✨ [변경] 메인 화면을 임시 런처 액티비티로 지정 -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+            android:exported="false"/>
+
 
     </application>
 </manifest>
