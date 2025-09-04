@@ -28,8 +28,9 @@ class SignupActivity : AppCompatActivity() {
         }
     }
 
-    private val kakaoId: String by lazy {
-        intent.getStringExtra(LoginActivity.EXTRA_KAKAO_ID)?.trim().orEmpty()
+    // ✅ LoginActivity에서 넘긴 Firebase Auth UID 사용
+    private val uid: String by lazy {
+        intent.getStringExtra(LoginActivity.EXTRA_UID)?.trim().orEmpty()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,13 +38,13 @@ class SignupActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 닉네임 프리필
+        // 닉네임 프리필 (LoginActivity에서 전달한 displayName 등)
         intent.getStringExtra(LoginActivity.EXTRA_NICKNAME)
             ?.takeIf { it.isNotBlank() }
             ?.let { binding.etNickname.setText(it) }
 
-        // kakaoId 필수 검사 (없으면 회원가입 진행 못 하게)
-        if (kakaoId.isBlank()) {
+        // ✅ UID 필수 검사 (없으면 회원가입 진행 불가)
+        if (uid.isBlank()) {
             Toast.makeText(this, "로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.", Toast.LENGTH_LONG).show()
             startActivity(Intent(this, LoginActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -52,7 +53,7 @@ class SignupActivity : AppCompatActivity() {
             return
         }
 
-        // 생년월일
+        // 1) 생년월일 DatePicker
         val constraints = CalendarConstraints.Builder()
             .setValidator(DateValidatorPointBackward.now())
             .build()
@@ -68,24 +69,38 @@ class SignupActivity : AppCompatActivity() {
             binding.etBirth.setText(dateFormatter.format(Date(millis)))
         }
 
-        // 드롭다운
-        binding.actvRegion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1,
-            resources.getStringArray(R.array.kor_regions).toList()))
-        binding.actvIncome.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1,
-            resources.getStringArray(R.array.income_brackets).toList()))
-        binding.actvKeyword.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1,
-            resources.getStringArray(R.array.interest_keywords).toList()))
+        // 2) 드롭다운 연결
+        binding.actvRegion.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.kor_regions).toList())
+        )
+        binding.actvIncome.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.income_brackets).toList())
+        )
+        binding.actvKeyword.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.interest_keywords).toList())
+        )
         binding.actvRegion.threshold = 0
         binding.actvIncome.threshold = 0
         binding.actvKeyword.threshold = 0
         binding.actvRegion.setOnClickListener { binding.actvRegion.showDropDown() }
         binding.actvIncome.setOnClickListener { binding.actvIncome.showDropDown() }
         binding.actvKeyword.setOnClickListener { binding.actvKeyword.showDropDown() }
-        binding.actvRegion.setOnFocusChangeListener { _: View, hasFocus: Boolean -> if (hasFocus) binding.actvRegion.showDropDown() }
-        binding.actvIncome.setOnFocusChangeListener { _: View, hasFocus: Boolean -> if (hasFocus) binding.actvIncome.showDropDown() }
-        binding.actvKeyword.setOnFocusChangeListener { _: View, hasFocus: Boolean -> if (hasFocus) binding.actvKeyword.showDropDown() }
 
-        // 가입 저장
+        // 타입 명시해서 "Cannot infer type" 방지
+        binding.actvRegion.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
+            if (hasFocus) binding.actvRegion.showDropDown()
+        }
+        binding.actvIncome.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
+            if (hasFocus) binding.actvIncome.showDropDown()
+        }
+        binding.actvKeyword.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
+            if (hasFocus) binding.actvKeyword.showDropDown()
+        }
+
+        // 3) 가입 저장
         binding.btnSignUp.setOnClickListener {
             val nickname = binding.etNickname.text?.toString()?.trim().orEmpty()
             val birthStr = binding.etBirth.text?.toString()?.trim().orEmpty()
@@ -96,13 +111,14 @@ class SignupActivity : AppCompatActivity() {
             val agreeNotify = binding.cbAgreeNotify.isChecked
 
             if (nickname.isEmpty() || birthStr.isEmpty() || region.isEmpty() || income.isEmpty()) {
-                Toast.makeText(this, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show(); return@setOnClickListener
+                Toast.makeText(this, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
             if (!agreeInfo) {
-                Toast.makeText(this, "개인 정보 수집에 동의해주세요.", Toast.LENGTH_SHORT).show(); return@setOnClickListener
+                Toast.makeText(this, "개인 정보 수집에 동의해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
-            // kakaoId 최종 확인
-            if (kakaoId.isBlank()) {
+            if (uid.isBlank()) {
                 Toast.makeText(this, "저장 실패: 로그인 정보가 없습니다.", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
@@ -117,18 +133,19 @@ class SignupActivity : AppCompatActivity() {
 
             val data = hashMapOf(
                 "nickname"     to nickname,
-                "birth"        to birthDate,
+                "birth"        to birthDate,               // Firestore에 Timestamp로 저장
                 "region_label" to region,
                 "income"       to income,
                 "interest"     to keyword,
                 "agree_info"   to agreeInfo,
                 "agree_notify" to agreeNotify,
+                "auth_uid"     to uid,                     // (선택) 추후 디버깅 편의
                 "updatedAt"    to FieldValue.serverTimestamp()
             )
 
             FirebaseFirestore.getInstance()
                 .collection("user")
-                .document(kakaoId)            // ✅ Default로 저장하지 않음
+                .document(uid)                 // ✅ 문서 ID = Firebase UID
                 .set(data, SetOptions.merge())
                 .addOnSuccessListener {
                     startActivity(Intent(this, MainActivity::class.java))

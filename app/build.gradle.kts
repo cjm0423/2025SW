@@ -60,18 +60,11 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // Firebase BOM (버전은 BOM이 관리)
-    implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
+    //implementation(platform("com.google.firebase:firebase-bom:34.2.0")) 안드로이드 스튜디오 버전 업데이트 필요
 
-    // ⚠️ Analytics는 Kotlin 2.x 산출물과 충돌 가능하므로 옵션 A에서는 제외
-    // implementation("com.google.firebase:firebase-analytics")
 
-    // ✅ KTX 없이 Firestore 사용
-    implementation("com.google.firebase:firebase-firestore")
-
-    // (필요 시) Auth도 KTX 없이 사용하려면 아래를 사용
-    // implementation("com.google.firebase:firebase-auth")
-
+    implementation("com.google.firebase:firebase-firestore:24.9.0")
+    implementation("com.google.firebase:firebase-auth:22.3.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
