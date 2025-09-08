@@ -204,11 +204,11 @@
             android:layout_marginTop="24dp"
             android:maxWidth="360dp"
             android:backgroundTint="#FEE500"
-            android:iconGravity="textStart"
-            android:iconPadding="8dp"
             android:text="회원 가입"
             android:textColor="#000"
             app:cornerRadius="8dp"/>
+        <!-- android:iconGravity="textStart" -->
+        <!-- android:iconPadding="8dp" -->
 
         <!-- 여백 -->
         <View

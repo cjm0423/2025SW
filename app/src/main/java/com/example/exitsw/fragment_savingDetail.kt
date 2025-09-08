@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -33,8 +34,34 @@ class fragment_savingDetail : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_saving_detail, container, false)
+        val view = inflater.inflate(R.layout.fragment_saving_detail, container, false)
+
+        val productName = arguments?.getString("product_name")
+        val bankName = arguments?.getString("bank_name")
+        val note = arguments?.getString("note")
+
+        val nameTextView = view.findViewById<TextView>(R.id.text_saving_name)
+        val bankTextView = view.findViewById<TextView>(R.id.text_bank_name)
+        val noteTextView = view.findViewById<TextView>(R.id.text_note)
+
+        nameTextView.text = productName
+        bankTextView.text = bankName
+        noteTextView.text = note
+
+        // 금리 인자 꺼내기 (어댑터에서 putDouble 해준 값)
+        val baseRateRaw = arguments?.getDouble("base_rate", Double.NaN) ?: Double.NaN
+        val preferRateRaw = arguments?.getDouble("prefer_rate", Double.NaN) ?: Double.NaN
+        val baseRate: Double? = baseRateRaw.takeIf { it.isFinite() && it > 0.0 }
+        val preferRate: Double? = preferRateRaw.takeIf { it.isFinite() && it > 0.0 }
+
+        // 계산하기 버튼 → 바텀시트 띄우기
+        view.findViewById<View>(R.id.btn_calculate)?.setOnClickListener {
+            SavingCalculatorBottomSheet
+                .newInstance(baseRate = baseRate, preferRate = preferRate)
+                .show(parentFragmentManager, "saving_calc")
+        }
+
+        return view
     }
 
     companion object {
