@@ -35,37 +35,15 @@
                     app:layout_constraintDimensionRatio="H,16:9"/>
 
                 <ImageButton
-                    android:id="@+id/btn_profile"
-                    style="@style/NoBackground_ImageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_ai"
-                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="10dp"/>
-
-                <ImageButton
                     android:id="@+id/btn_notification"
                     style="@style/NoBackground_ImageButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_policy"
+                    android:layout_marginTop="16dp"
+                    android:src="@drawable/ic_notifications"
                     app:layout_constraintTop_toTopOf="@+id/bannerImage"
-                    app:layout_constraintEnd_toStartOf="@+id/btn_settings"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="5dp" />
-
-                <ImageButton
-                    android:id="@+id/btn_settings"
-                    style="@style/NoBackground_ImageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_home"
-                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="10dp"/>
+                    tools:layout_editor_absoluteX="371dp"
+                    app:layout_constraintEnd_toEndOf="@+id/bannerImage"/>
 
                 <TextView
                     android:id="@+id/todayDateText"
