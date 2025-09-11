@@ -53,12 +53,40 @@
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp" />
 
+
+
+            <!-- 하트 + 숫자 : 가로 배치 -->
+            <LinearLayout
+                android:id="@+id/layoutFavoriteRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btn_favorite"
+                    android:src="@drawable/ic_favorite_plus"
+                    style="@style/NoBackground_ImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/textFavoriteNum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    tools:text="0" />
+            </LinearLayout>
+
             <Button
                 android:id="@+id/btnGoToSite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:text="신청하러 가기" />
 
             <TextView
