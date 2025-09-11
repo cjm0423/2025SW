@@ -109,7 +109,7 @@ object WelfareApiToFirebase {
                 Log.e(TAG, msg)
 
                 if (sigunguCd == null && code in listOf(400, 422)) {
-                    throw IllegalStateException("서버가 sigunguCd 없는 전체 조회를 허용하지 않습니다. 시군구 코드를 지정하세요. ($msg)")
+                    throw IllegalStateException("서버가 sigunguCd(시군구 코드) 파라미터를 요구합니다.")
                 } else {
                     throw IllegalStateException("정책 API 요청 실패: $msg")
                 }
