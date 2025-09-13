@@ -8,21 +8,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.ItemHomeCardBinding
 
-// ✨ [변경] 생성자에 클릭 리스너를 받도록 추가
 class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit) : ListAdapter<LocalWelfareServiceDto, HomeCardAdapter.HomeCardViewHolder>(DiffCallback) {
 
     inner class HomeCardViewHolder(private val binding: ItemHomeCardBinding) : RecyclerView.ViewHolder(binding.root) {
-        // ✨ [추가] ViewHolder가 생성될 때 클릭 리스너를 설정
         init {
             itemView.setOnClickListener {
-                // 현재 위치의 아이템을 클릭 리스너에 전달
                 onItemClicked(getItem(adapterPosition))
             }
         }
 
         fun bind(item: LocalWelfareServiceDto) {
-            binding.textCardTitle.text = item.serviceName ?: "정보 없음"
-            binding.textCardSubtitle.text = item.department ?: ""
+            // [수정] serviceName -> servNm, department -> bizChrDeptNm 으로 변경
+            binding.textCardTitle.text = item.servNm ?: "정보 없음"
+            binding.textCardSubtitle.text = item.bizChrDeptNm ?: ""
         }
     }
 
@@ -38,7 +36,8 @@ class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Uni
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<LocalWelfareServiceDto>() {
             override fun areItemsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
-                return oldItem.serviceId == newItem.serviceId
+                // [수정] serviceId -> servId 로 변경
+                return oldItem.servId == newItem.servId
             }
             override fun areContentsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
                 return oldItem == newItem

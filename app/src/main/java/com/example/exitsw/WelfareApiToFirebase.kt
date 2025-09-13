@@ -31,27 +31,28 @@ import java.util.concurrent.TimeUnit
 object WelfareApiToFirebase {
 
     private const val TAG = "WelfareSync"
-
-    // ※ 에뮬레이터: 10.0.2.2 / 물리 디바이스: PC 로컬 IP(예: 192.168.x.x)로 반드시 변경
-    //private const val BASE_URL = "http://10.0.2.2:8080/"
     private const val BASE_URL = "http://172.30.1.60:8080/"
     private const val PATH_LOCAL_WELFARE = "/api/welfare/local/services"
+
+    private val KOREA_SIGUNGU_CODES = listOf(
+        "11000", "26000", "27000", "28000", "29000", "30000", "31000", "36000",
+        "41000", "42000", "43000", "44000", "45000", "46000", "47000", "48000", "50000"
+    )
 
     private interface Api {
         @GET(PATH_LOCAL_WELFARE)
         suspend fun getLocalWelfareList(
-            @Query("sigunguCd") sigunguCd: String? = null,
+            @Query("sigunguCd") sigunguCd: String?,
             @Query("pageNo") pageNo: Int = 1,
-            @Query("numOfRows") numOfRows: Int = 100
+            @Query("numOfRows") numOfRows: Int = 10
         ): Response<JsonObject>
     }
 
     private fun buildOkHttp(context: Context): OkHttpClient {
         val cacheSize = 10L * 1024 * 1024
         val cache = Cache(File(context.cacheDir, "http-cache"), cacheSize)
-
         val httpLog = HttpLoggingInterceptor { msg -> Log.d("OkHttp", msg) }
-            .setLevel(HttpLoggingInterceptor.Level.BODY) // BODY로 올려서 응답 바디까지 확인
+            .setLevel(HttpLoggingInterceptor.Level.BODY)
 
         return OkHttpClient.Builder()
             .cache(cache)
@@ -69,7 +70,7 @@ object WelfareApiToFirebase {
             .addInterceptor(httpLog)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .build()
     }
 
@@ -82,74 +83,61 @@ object WelfareApiToFirebase {
 
     private fun api(context: Context): Api = buildRetrofit(context).create(Api::class.java)
 
-    /**
-     * 정책 수집 → Firestore 저장
-     * @param sigunguCd 대부분 서버가 필수로 요구. 전체 조회가 안 되면 400/422가 뜹니다.
-     */
     suspend fun sync(
         context: Context,
-        sigunguCd: String? = null,
-        pageSize: Int = 100
+        pageSize: Int = 10
     ): Int = withContext(Dispatchers.IO) {
         val service = api(context)
         val db = FirebaseFirestore.getInstance()
         val gson = Gson()
+        val allJsonObjects = mutableListOf<JsonObject>()
 
-        var page = 1
-        var totalSaved = 0
-        var totalCount: Int? = null
+        for (sigunguCode in KOREA_SIGUNGU_CODES) {
+            Log.d(TAG, "[시작] 지역 코드: $sigunguCode 데이터 수집 (1페이지)")
 
-        while (true) {
-            val resp = service.getLocalWelfareList(sigunguCd, page, pageSize)
+            val resp = service.getLocalWelfareList(sigunguCode, 1, pageSize)
 
             if (!resp.isSuccessful) {
-                val code = resp.code()
-                val errBody = resp.errorBody()?.string().orEmpty()
-                val msg = "HTTP $code, body=$errBody"
-                Log.e(TAG, msg)
-
-                if (sigunguCd == null && code in listOf(400, 422)) {
-                    throw IllegalStateException("서버가 sigunguCd(시군구 코드) 파라미터를 요구합니다.")
-                } else {
-                    throw IllegalStateException("정책 API 요청 실패: $msg")
-                }
+                Log.e(TAG, "API 요청 실패 (코드: ${resp.code()}). 다음 지역으로 넘어갑니다.")
+                continue
             }
 
-            val root = resp.body() ?: throw IllegalStateException("응답 바디가 없습니다.")
-            // items/data 우선 → 없으면 JSON 트리에서 가장 큰 배열 자동 탐색(스키마 방어)
-            val items = findFirstArrayByName(root, "items")
-                ?: findFirstArrayByName(root, "data")
-                ?: findLargestArray(root)
-                ?: JsonArray()
-
-            if (totalCount == null) {
-                totalCount = findFirstNumberByName(root, "totalCount")
-                    ?: findFirstNumberByName(root, "count")
+            val root = resp.body()
+            if (root != null) {
+                val items = findFirstArrayByName(root, "servList") ?: JsonArray()
+                val jsonObjects = items.filter { it.isJsonObject }.map { it.asJsonObject }
+                allJsonObjects.addAll(jsonObjects)
+                Log.d(TAG, "($sigunguCode): ${jsonObjects.size}건 수집 (누적: ${allJsonObjects.size}건)")
             }
 
-            if (items.size() == 0) {
-                Log.d(TAG, "아이템 0건(page=$page). 종료.")
+            // [수정점] 수집한 데이터의 총 개수가 10개를 넘으면 즉시 반복을 중단합니다.
+            if (allJsonObjects.size >= 10) {
+                Log.i(TAG, "목표 수집량(10개)에 도달하여 데이터 수집을 중단합니다.")
                 break
             }
+        }
 
-            val jsonObjects = items.filter { it.isJsonObject }.map { it.asJsonObject }
-            jsonObjects.chunked(400).forEach { chunk ->
+        // 만약 마지막 API 호출로 10개를 초과해서 수집했을 경우, 정확히 10개만 잘라냅니다.
+        val finalObjects = allJsonObjects.take(10)
+
+        Log.i(TAG, "모든 지역 데이터 수집 완료. 총 ${finalObjects.size}건. Firestore 저장을 시작합니다.")
+
+        if (finalObjects.isEmpty()) {
+            Log.w(TAG, "저장할 데이터가 없습니다. 동기화를 종료합니다.")
+            return@withContext 0
+        }
+
+        var totalSaved = 0
+        finalObjects.distinctBy { it["servId"]?.asString }
+            .chunked(400).forEach { chunk ->
                 db.runBatch { batch ->
                     chunk.forEach { jo ->
                         val map = jsonToPlainMap(gson, jo).toMutableMap()
+                        val docId = (map["servId"] ?: map["svcId"] ?: map["id"] ?: map["serviceId"] ?: sha1(gson.toJson(jo))).toString()
 
-                        val docId = (
-                                map["svcId"] ?: map["id"] ?: map["serviceId"] ?: map["service_id"] ?: map["no"]
-                                ?: sha1(gson.toJson(jo))
-                                ).toString()
-
-                        val resolvedSigungu = (map["sigunguCd"] ?: sigunguCd ?: "ALL").toString()
-
-                        map["sigunguCd"] = resolvedSigungu
                         map["source"] = "api"
                         map["syncedAt"] = FieldValue.serverTimestamp()
 
-                        // 전역 카탈로그
                         batch.set(
                             db.collection("policies")
                                 .document("all")
@@ -161,19 +149,12 @@ object WelfareApiToFirebase {
                     }
                 }.await()
                 totalSaved += chunk.size
-                Log.d(TAG, "Firestore 저장: +${chunk.size} (누적=$totalSaved)")
+                Log.d(TAG, "Firestore 저장: +${chunk.size}건 (누적: $totalSaved 건)")
             }
 
-            val more = if (totalCount != null) totalSaved < totalCount!! else items.size() >= pageSize
-            if (!more) break
-            page += 1
-        }
-
-        Log.i(TAG, "동기화 완료. 총 저장: $totalSaved")
+        Log.i(TAG, "동기화 완료. 총 저장된 데이터: $totalSaved 건")
         totalSaved
     }
-
-    // ------- Utilities -------
 
     private fun isNetworkAvailable(context: Context): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -204,7 +185,6 @@ object WelfareApiToFirebase {
         return null
     }
 
-    // JSON 트리 전체에서 "가장 큰 배열"을 찾아서 반환(스키마가 불안정할 때 유용)
     private fun findLargestArray(root: JsonElement?): JsonArray? {
         var best: JsonArray? = null
         fun dfs(el: JsonElement?) {
@@ -219,30 +199,6 @@ object WelfareApiToFirebase {
         }
         dfs(root)
         return best
-    }
-
-    private fun findFirstNumberByName(root: JsonElement?, name: String): Int? {
-        if (root == null || root.isJsonNull) return null
-        if (root.isJsonObject) {
-            val obj = root.asJsonObject
-            obj.entrySet().forEach { (k, v) ->
-                if (k.equals(name, ignoreCase = true) &&
-                    v.isJsonPrimitive && v.asJsonPrimitive.isNumber
-                ) {
-                    return try { v.asInt } catch (_: Exception) { v.asDouble.toInt() }
-                }
-            }
-            obj.entrySet().forEach { (_, v) ->
-                val found = findFirstNumberByName(v, name)
-                if (found != null) return found
-            }
-        } else if (root.isJsonArray) {
-            root.asJsonArray.forEach { el ->
-                val found = findFirstNumberByName(el, name)
-                if (found != null) return found
-            }
-        }
-        return null
     }
 
     private fun jsonToPlainMap(gson: Gson, jo: JsonObject): Map<String, Any?> {

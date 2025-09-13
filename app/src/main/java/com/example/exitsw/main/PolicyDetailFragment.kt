@@ -8,9 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.exitsw.LoginActivity
 import com.example.exitsw.R
-import com.example.exitsw.SignupActivity
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyDetailBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -33,7 +31,6 @@ class PolicyDetailFragment : Fragment() {
     private val db by lazy { FirebaseFirestore.getInstance() }
     private val auth by lazy { FirebaseAuth.getInstance() }
 
-    // Firestore refs
     private var itemRef: DocumentReference? = null
     private var likeRef: DocumentReference? = null
     private var countListener: ListenerRegistration? = null
@@ -65,37 +62,25 @@ class PolicyDetailFragment : Fragment() {
         val uid = auth.currentUser?.uid
             ?: throw IllegalStateException("User must be logged in before entering PolicyDetailFragment")
 
-        // (선택) 프로필 없으면 가입으로 라우팅하고 싶다면 주석 해제
-        // db.collection("user").document(uid).get().addOnSuccessListener { if (!it.exists()) {
-        //     startActivity(Intent(requireContext(), SignupActivity::class.java).apply {
-        //         putExtra(LoginActivity.EXTRA_UID, uid)
-        //     })
-        //     requireActivity().finish()
-        // } }
-
         policy?.let { p ->
-            // UI 바인딩
-            binding.toolbar.title = p.serviceName
-            binding.textPolicyName.text = p.serviceName
-            binding.textPolicyAgency.text = p.department
-            binding.textPolicySummary.text = p.summary
+            // [수정] UI 바인딩 시 변경된 변수 이름을 사용합니다.
+            binding.toolbar.title = p.servNm
+            binding.textPolicyName.text = p.servNm
+            binding.textPolicyAgency.text = p.bizChrDeptNm
+            binding.textPolicySummary.text = p.servDgst
 
-            // ★ docId를 WelfareApiToFirebase와 동일 규칙으로 생성
             val docId = resolveDocIdSameAsSync(p)
             require(docId.isNotBlank()) { "policy docId is blank" }
 
-            // ★ 경로 일치: policies/all/items/{docId}
             itemRef = db.collection("policies").document("all")
                 .collection("items").document(docId)
             likeRef = itemRef!!.collection("likes").document(uid)
 
-            // 실시간 카운트
             countListener = itemRef!!.addSnapshotListener { snap, _ ->
                 val count = snap?.getLong("favoritesCount") ?: 0L
                 binding.textFavoriteNum.text = count.toString()
             }
 
-            // 내 좋아요 상태
             likeListener = likeRef!!.addSnapshotListener { snap, _ ->
                 val liked = snap?.exists() == true
                 binding.btnFavorite.setImageResource(
@@ -103,12 +88,11 @@ class PolicyDetailFragment : Fragment() {
                 )
             }
 
-            // 좋아요 토글
             binding.btnFavorite.setOnClickListener { toggleFavorite() }
 
-            // "신청하러 가기"
+            // [수정] "신청하러 가기" 버튼에서 변경된 변수 이름을 사용합니다.
             binding.btnGoToSite.setOnClickListener {
-                p.detailLink?.let { url ->
+                p.servDtlLink?.let { url ->
                     if (url.isNotBlank()) {
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
@@ -116,7 +100,6 @@ class PolicyDetailFragment : Fragment() {
             }
         }
 
-        // 뒤로가기
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
@@ -154,15 +137,14 @@ class PolicyDetailFragment : Fragment() {
                 }
             }
 
-        // ---------- helpers: sync와 동일한 docId 규칙 ----------
         private fun resolveDocIdSameAsSync(dto: LocalWelfareServiceDto): String {
-            // DTO를 Map으로 변환해서 키 우선순위 조회
             val gson = Gson()
             val json = gson.toJson(dto)
             val type = object : TypeToken<Map<String, Any?>>() {}.type
             val map: Map<String, Any?> = gson.fromJson(json, type)
 
-            val candidate = listOf("svcId", "id", "serviceId", "service_id", "no")
+            // [수정] DTO의 변경된 변수 이름(servId)을 최우선으로 사용하도록 변경
+            val candidate = listOf("servId", "svcId", "id", "service_id", "no")
                 .firstNotNullOfOrNull { k -> map[k]?.toString()?.takeIf { it.isNotBlank() } }
 
             return candidate ?: sha1(json)
