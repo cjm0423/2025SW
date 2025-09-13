@@ -34,7 +34,7 @@ object WelfareApiToFirebase {
 
     // ※ 에뮬레이터: 10.0.2.2 / 물리 디바이스: PC 로컬 IP(예: 192.168.x.x)로 반드시 변경
     //private const val BASE_URL = "http://10.0.2.2:8080/"
-    private const val BASE_URL = "http://172.20.10.2:8080/"
+    private const val BASE_URL = "http://172.30.1.60:8080/"
     private const val PATH_LOCAL_WELFARE = "/api/welfare/local/services"
 
     private interface Api {
