@@ -50,6 +50,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.menu_policy -> {
                     replaceFragment(MypageFragment()); true
                 }
+                R.id.menu_ai -> {
+                    replaceFragment(ChatbotFragment()); true
+                }
                 else -> false
             }
         }
