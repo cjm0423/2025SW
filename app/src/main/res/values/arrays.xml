@@ -2,23 +2,16 @@
 <resources>
     <!-- 시/도 -->
     <string-array name="kor_regions">
-        <item>서울특별시</item>
-        <item>부산광역시</item>
-        <item>대구광역시</item>
-        <item>인천광역시</item>
-        <item>광주광역시</item>
-        <item>대전광역시</item>
-        <item>울산광역시</item>
-        <item>세종특별자치시</item>
+        <item>서울시</item>
         <item>경기도</item>
-        <item>강원특별자치도</item>
+        <item>강원도</item>
         <item>충청북도</item>
         <item>충청남도</item>
-        <item>전북특별자치도</item>
+        <item>전라북도</item>
         <item>전라남도</item>
         <item>경상북도</item>
         <item>경상남도</item>
-        <item>제주특별자치도</item>
+        <item>제주도</item>
     </string-array>
 
     <!-- 소득 분위 -->
@@ -34,5 +27,10 @@
         <item>9분위</item>
         <item>10분위</item>
         <item>차상위</item>
+    </string-array>
+
+    <string-array name="gender_options">
+        <item>남자</item>
+        <item>여자</item>
     </string-array>
 </resources>

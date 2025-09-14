@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -69,27 +70,50 @@ class SignupActivity : AppCompatActivity() {
             binding.etBirth.setText(dateFormatter.format(Date(millis)))
         }
 
-        // 2) 드롭다운 연결
+        // 2) 드롭다운 연결 (성별/지역/소득/키워드)
+        binding.actvGender.setAdapter(
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.gender_options).toList()
+            )
+        )
         binding.actvRegion.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                resources.getStringArray(R.array.kor_regions).toList())
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.kor_regions).toList()
+            )
         )
         binding.actvIncome.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                resources.getStringArray(R.array.income_brackets).toList())
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.income_brackets).toList()
+            )
         )
         binding.actvKeyword.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                resources.getStringArray(R.array.interest_keywords).toList())
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                resources.getStringArray(R.array.interest_keywords).toList()
+            )
         )
+
+        // 드롭다운 즉시 펼침 설정
+        binding.actvGender.threshold = 0
         binding.actvRegion.threshold = 0
         binding.actvIncome.threshold = 0
         binding.actvKeyword.threshold = 0
+
+        binding.actvGender.setOnClickListener { binding.actvGender.showDropDown() }
         binding.actvRegion.setOnClickListener { binding.actvRegion.showDropDown() }
         binding.actvIncome.setOnClickListener { binding.actvIncome.showDropDown() }
         binding.actvKeyword.setOnClickListener { binding.actvKeyword.showDropDown() }
 
-        // 타입 명시해서 "Cannot infer type" 방지
+        binding.actvGender.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
+            if (hasFocus) binding.actvGender.showDropDown()
+        }
         binding.actvRegion.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
             if (hasFocus) binding.actvRegion.showDropDown()
         }
@@ -103,6 +127,7 @@ class SignupActivity : AppCompatActivity() {
         // 3) 가입 저장
         binding.btnSignUp.setOnClickListener {
             val nickname = binding.etNickname.text?.toString()?.trim().orEmpty()
+            val gender   = binding.actvGender.text?.toString()?.trim().orEmpty()
             val birthStr = binding.etBirth.text?.toString()?.trim().orEmpty()
             val region   = binding.actvRegion.text?.toString()?.trim().orEmpty()
             val income   = binding.actvIncome.text?.toString()?.trim().orEmpty()
@@ -110,7 +135,9 @@ class SignupActivity : AppCompatActivity() {
             val agreeInfo   = binding.cbAgreeInfo.isChecked
             val agreeNotify = binding.cbAgreeNotify.isChecked
 
-            if (nickname.isEmpty() || birthStr.isEmpty() || region.isEmpty() || income.isEmpty()) {
+            if (nickname.isEmpty() || gender.isEmpty() || birthStr.isEmpty() ||
+                region.isEmpty() || income.isEmpty()
+            ) {
                 Toast.makeText(this, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -131,21 +158,26 @@ class SignupActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // ✅ 만 나이 계산
+            val ageYears = calculateAge(birthDate)
+
             val data = hashMapOf(
                 "nickname"     to nickname,
-                "birth"        to birthDate,               // Firestore에 Timestamp로 저장
+                "gender"       to gender,                 // ✅ 성별 저장
+                "birth"        to birthDate,              // Firestore Timestamp로 저장
+                "age_years"    to ageYears,               // ✅ 만 나이 저장
                 "region_label" to region,
                 "income"       to income,
                 "interest"     to keyword,
                 "agree_info"   to agreeInfo,
                 "agree_notify" to agreeNotify,
-                "auth_uid"     to uid,                     // (선택) 추후 디버깅 편의
+                "auth_uid"     to uid,                    // (선택) 추후 디버깅 편의
                 "updatedAt"    to FieldValue.serverTimestamp()
             )
 
             FirebaseFirestore.getInstance()
                 .collection("user")
-                .document(uid)                 // ✅ 문서 ID = Firebase UID
+                .document(uid)                             // ✅ 문서 ID = Firebase UID
                 .set(data, SetOptions.merge())
                 .addOnSuccessListener {
                     startActivity(Intent(this, MainActivity::class.java))
@@ -155,5 +187,22 @@ class SignupActivity : AppCompatActivity() {
                     Toast.makeText(this, "저장 실패: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
         }
+    }
+
+    private fun calculateAge(birth: Date, now: Date = Date()): Int {
+        val calBirth = Calendar.getInstance().apply { time = birth }
+        val calNow   = Calendar.getInstance().apply { time = now }
+
+        var age = calNow.get(Calendar.YEAR) - calBirth.get(Calendar.YEAR)
+
+        val currMonth = calNow.get(Calendar.MONTH)
+        val birthMonth = calBirth.get(Calendar.MONTH)
+        val currDay = calNow.get(Calendar.DAY_OF_MONTH)
+        val birthDay = calBirth.get(Calendar.DAY_OF_MONTH)
+
+        if (currMonth < birthMonth || (currMonth == birthMonth && currDay < birthDay)) {
+            age--
+        }
+        return age.coerceAtLeast(0)
     }
 }
