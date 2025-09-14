@@ -52,33 +52,6 @@
                 android:paddingBottom="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 2-1.5) 성별 (드롭다운) -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:maxWidth="360dp"
-            android:hint="성별"
-            app:boxCornerRadiusTopStart="16dp"
-            app:boxCornerRadiusTopEnd="16dp"
-            app:boxCornerRadiusBottomStart="16dp"
-            app:boxCornerRadiusBottomEnd="16dp"
-            android:elevation="2dp"
-            app:endIconMode="dropdown_menu">
-
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/actvGender"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                android:entries="@array/gender_options"
-                android:minHeight="48dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                tools:ignore="SpeakableTextPresent"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
         <!-- 2-2) 생년월일 (달력 선택 전용: 클릭만 가능) -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"

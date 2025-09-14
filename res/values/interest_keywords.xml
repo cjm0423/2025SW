@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="interest_keywords">
+        <item>주거</item>
+        <item>일자리</item>
+        <item>교육</item>
+        <item>창업</item>
+        <item>금융</item>
+        <item>복지</item>
+        <item>교통</item>
+        <item>문화·체육</item>
+        <item>의료·건강</item>
+        <item>가족·돌봄</item>
+    </string-array>
+</resources>
