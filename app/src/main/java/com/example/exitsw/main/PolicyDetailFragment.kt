@@ -8,8 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyDetailBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.security.MessageDigest
+import java.util.Locale
 
 class PolicyDetailFragment : Fragment() {
 
@@ -18,10 +28,16 @@ class PolicyDetailFragment : Fragment() {
 
     private var policy: LocalWelfareServiceDto? = null
 
+    private val db by lazy { FirebaseFirestore.getInstance() }
+    private val auth by lazy { FirebaseAuth.getInstance() }
+
+    private var itemRef: DocumentReference? = null
+    private var likeRef: DocumentReference? = null
+    private var countListener: ListenerRegistration? = null
+    private var likeListener: ListenerRegistration? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // 데이터를 전달받는 부분
         arguments?.let {
             policy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 it.getParcelable("policy", LocalWelfareServiceDto::class.java)
@@ -43,33 +59,73 @@ class PolicyDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 전달받은 policy 데이터가 null이 아닐 때 UI 업데이트
-        policy?.let { policyData ->
-            binding.toolbar.title = policyData.serviceName
-            binding.textPolicyName.text = policyData.serviceName
-            binding.textPolicyAgency.text = policyData.department
-            binding.textPolicySummary.text = policyData.summary
+        val uid = auth.currentUser?.uid
+            ?: throw IllegalStateException("User must be logged in before entering PolicyDetailFragment")
 
-            // "사이트로 이동" 버튼 클릭 리스너
+        policy?.let { p ->
+            // [수정] UI 바인딩 시 변경된 변수 이름을 사용합니다.
+            binding.toolbar.title = p.servNm
+            binding.textPolicyName.text = p.servNm
+            binding.textPolicyAgency.text = p.bizChrDeptNm
+            binding.textPolicySummary.text = p.servDgst
+
+            val docId = resolveDocIdSameAsSync(p)
+            require(docId.isNotBlank()) { "policy docId is blank" }
+
+            itemRef = db.collection("policies").document("all")
+                .collection("items").document(docId)
+            likeRef = itemRef!!.collection("likes").document(uid)
+
+            countListener = itemRef!!.addSnapshotListener { snap, _ ->
+                val count = snap?.getLong("favoritesCount") ?: 0L
+                binding.textFavoriteNum.text = count.toString()
+            }
+
+            likeListener = likeRef!!.addSnapshotListener { snap, _ ->
+                val liked = snap?.exists() == true
+                binding.btnFavorite.setImageResource(
+                    if (liked) R.drawable.ic_favorite_check else R.drawable.ic_favorite_plus
+                )
+            }
+
+            binding.btnFavorite.setOnClickListener { toggleFavorite() }
+
+            // [수정] "신청하러 가기" 버튼에서 변경된 변수 이름을 사용합니다.
             binding.btnGoToSite.setOnClickListener {
-                // [수정된 부분] it.detailLink가 아닌 policyData.detailLink로 올바르게 참조
-                policyData.detailLink?.let { url ->
+                p.servDtlLink?.let { url ->
                     if (url.isNotBlank()) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        startActivity(intent)
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
                 }
             }
         }
 
-        // 툴바의 뒤로가기 버튼
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
     }
 
+    private fun toggleFavorite() {
+        val itemRef = requireNotNull(itemRef)
+        val likeRef = requireNotNull(likeRef)
+
+        db.runTransaction { tx ->
+            val likeSnap = tx.get(likeRef)
+            val liked = likeSnap.exists()
+            if (liked) {
+                tx.delete(likeRef)
+                tx.update(itemRef, "favoritesCount", FieldValue.increment(-1))
+            } else {
+                tx.set(likeRef, mapOf("createdAt" to FieldValue.serverTimestamp()))
+                tx.update(itemRef, "favoritesCount", FieldValue.increment(1))
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        countListener?.remove()
+        likeListener?.remove()
         _binding = null
     }
 
@@ -80,5 +136,24 @@ class PolicyDetailFragment : Fragment() {
                     putParcelable("policy", policy)
                 }
             }
+
+        private fun resolveDocIdSameAsSync(dto: LocalWelfareServiceDto): String {
+            val gson = Gson()
+            val json = gson.toJson(dto)
+            val type = object : TypeToken<Map<String, Any?>>() {}.type
+            val map: Map<String, Any?> = gson.fromJson(json, type)
+
+            // [수정] DTO의 변경된 변수 이름(servId)을 최우선으로 사용하도록 변경
+            val candidate = listOf("servId", "svcId", "id", "service_id", "no")
+                .firstNotNullOfOrNull { k -> map[k]?.toString()?.takeIf { it.isNotBlank() } }
+
+            return candidate ?: sha1(json)
+        }
+
+        private fun sha1(input: String): String {
+            val md = MessageDigest.getInstance("SHA-1")
+            val bytes = md.digest(input.toByteArray())
+            return bytes.joinToString("") { "%02x".format(it) }.lowercase(Locale.US)
+        }
     }
 }

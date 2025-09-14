@@ -42,14 +42,12 @@ class MainFragment : Fragment() {
                 viewModel.popularList.observe(viewLifecycleOwner) { list ->
                         popularAdapter.submitList(list)
                 }
-                // 홈 화면 미리보기용 지역 목록을 관찰
                 viewModel.homeRegionList.observe(viewLifecycleOwner) { list ->
                         policyAdapter.submitList(list)
                 }
         }
 
         private fun setupClickListeners() {
-                // '지역별 지원 정책' 제목을 누르면 전체 지역 목록으로 이동
                 binding.textPolicyTitle.setOnClickListener {
                         parentFragmentManager.beginTransaction()
                                 .replace(R.id.fragment_container, RegionListFragment())
@@ -59,15 +57,13 @@ class MainFragment : Fragment() {
         }
 
         private fun setupRecyclerViews() {
-                // 추천/인기 상품 어댑터 (클릭 시 동작 없음)
                 recommendAdapter = HomeCardAdapter { /* TODO: 추천 상품 클릭 시 동작 */ }
                 popularAdapter = HomeCardAdapter { /* TODO: 인기 상품 클릭 시 동작 */ }
 
-                // 지역별 정책 어댑터 (클릭 시 화면 전환)
+                // [수정 완료] 클릭된 카드의 servNm (서비스 이름)을 PolicyListFragment로 전달
                 policyAdapter = HomeCardAdapter { regionDto ->
-                        // 클릭된 카드의 serviceName (지역 이름)을 PolicyListFragment로 전달
                         parentFragmentManager.beginTransaction()
-                                .replace(R.id.fragment_container, PolicyListFragment.newInstance(regionDto.serviceName ?: ""))
+                                .replace(R.id.fragment_container, PolicyListFragment.newInstance(regionDto.servNm ?: ""))
                                 .addToBackStack(null)
                                 .commit()
                 }

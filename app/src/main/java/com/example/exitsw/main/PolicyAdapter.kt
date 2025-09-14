@@ -8,20 +8,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.ItemPolicyBinding
 
-// ✨ [변경] 클릭 시 LocalWelfareServiceDto 객체를 전달하도록 변경
 class PolicyAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit) : ListAdapter<LocalWelfareServiceDto, PolicyAdapter.PolicyViewHolder>(DiffCallback) {
 
     inner class PolicyViewHolder(private val binding: ItemPolicyBinding) : RecyclerView.ViewHolder(binding.root) {
-        // ✨ [추가] ViewHolder가 생성될 때 클릭 리스너를 설정
         init {
             itemView.setOnClickListener {
                 onItemClicked(getItem(adapterPosition))
             }
         }
         fun bind(policy: LocalWelfareServiceDto) {
-            binding.textPolicyName.text = policy.serviceName ?: "정보 없음"
-            binding.textPolicyAgency.text = policy.department ?: ""
-            binding.textPolicySummary.text = policy.summary ?: ""
+            // [수정] DTO 클래스의 변경된 변수 이름으로 교체
+            binding.textPolicyName.text = policy.servNm ?: "정보 없음"
+            binding.textPolicyAgency.text = policy.bizChrDeptNm ?: ""
+            binding.textPolicySummary.text = policy.servDgst ?: ""
         }
     }
 
@@ -37,7 +36,8 @@ class PolicyAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit)
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<LocalWelfareServiceDto>() {
             override fun areItemsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
-                return oldItem.serviceId == newItem.serviceId
+                // [수정] DTO 클래스의 변경된 변수 이름으로 교체
+                return oldItem.servId == newItem.servId
             }
             override fun areContentsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
                 return oldItem == newItem

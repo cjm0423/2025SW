@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.data.RegionInfo
-import com.example.exitsw.network.RetrofitClient
+import com.example.exitsw.repository.FirebaseRepository
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,28 +28,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _regionInfoList = MutableLiveData<List<RegionInfo>>()
     val regionInfoList: LiveData<List<RegionInfo>> get() = _regionInfoList
 
+    private val firebaseRepository = FirebaseRepository()
 
     init {
-        loadStaticData()
+        // ✨ [변경] 각 데이터 로딩 함수를 명확하게 분리
+        setupPlaceholders()
         fetchLocalWelfareData()
     }
 
-    private fun loadStaticData() {
+    // ✨ [변경] 초기 placeholder 설정 로직을 분리
+    private fun setupPlaceholders() {
         val staticRegions = listOf(
             "서울시", "경기도", "강원도", "충청북도", "충청남도",
             "전라북도", "전라남도", "경상북도", "경상남도", "제주도"
         )
+
         _homeRegionList.value = staticRegions.map { regionName ->
             LocalWelfareServiceDto(
-                serviceId = regionName,
-                serviceName = regionName,
-                department = "정책 목록 보기",
-                summary = null, region = regionName, city = null, detailLink = null
+                servId = regionName,
+                servNm = regionName,
+                bizChrDeptNm = "정책 목록 보기"
             )
         }
         _regionInfoList.value = staticRegions.map { RegionInfo(name = it, policyCount = null) }
 
-        val placeholder = LocalWelfareServiceDto("LOADING", "연결 확인 중...", "", null, null, null, null)
+        // 추천 및 인기 상품은 "준비 중"으로 표시
+        val placeholder = LocalWelfareServiceDto(servId = "COMING_SOON", servNm = "서비스 준비 중", bizChrDeptNm = "곧 만나요!")
         _recommendList.value = listOf(placeholder, placeholder, placeholder)
         _popularList.value = listOf(placeholder, placeholder, placeholder)
     }
@@ -71,18 +75,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // ✨ [변경] 이 함수는 이제 지역별 정책 데이터만 처리
     private fun fetchLocalWelfareData() {
         viewModelScope.launch {
             try {
-                // sigunguCd에 빈 값을 넣어 전국 데이터를 한번에 호출합니다.
-                val response = RetrofitClient.getInstance(getApplication()).getLocalWelfareList(
-                    sigunguCd = "",
-                    numOfRows = 100 // 예: 100개 데이터 요청
-                )
+                val policyList = firebaseRepository.getAllWelfareServices()
 
-                val policyList = response.servList
-
-                val groupedData = policyList.groupBy { normalizeRegion(it.region) }
+                val groupedData = policyList.groupBy { normalizeRegion(it.ctpvNm) }
                 _groupedWelfareData.value = groupedData
 
                 val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
@@ -90,17 +89,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     RegionInfo(name = regionName, policyCount = groupedData[regionName]?.size ?: 0)
                 }
 
-                _recommendList.value = policyList.take(3)
-                _popularList.value = policyList.shuffled().take(3)
+                // ✨ [삭제] 추천/인기 리스트를 업데이트하는 코드를 제거하여 분리
+                // _recommendList.value = policyList.take(3) -> 삭제
+                // _popularList.value = policyList.shuffled().take(3) -> 삭제
 
-                Log.d("MainViewModel", "성공: ${policyList.size}개의 데이터를 가져왔습니다.")
+                Log.d("MainViewModel", "성공 (지역 정책): ${policyList.size}개의 데이터를 Firestore에서 가져왔습니다.")
 
             } catch (e: Exception) {
-                Log.e("MainViewModel", "데이터 로딩 실패: ${e.message}")
-
-                val errorPlaceholder = LocalWelfareServiceDto("ERROR", "연결 실패", e.message, null, null, null, null)
-                _recommendList.value = listOf(errorPlaceholder, errorPlaceholder, errorPlaceholder)
-                _popularList.value = listOf(errorPlaceholder, errorPlaceholder, errorPlaceholder)
+                Log.e("MainViewModel", "지역 정책 데이터 로딩 실패: ${e.message}")
 
                 val currentRegions = _regionInfoList.value?.map { it.name } ?: emptyList()
                 _regionInfoList.value = currentRegions.map { RegionInfo(name = it, policyCount = -1) }
