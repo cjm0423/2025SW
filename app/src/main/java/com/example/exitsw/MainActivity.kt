@@ -78,3 +78,4 @@ class MainActivity : AppCompatActivity() {
         Log.d("WorkManager", "7일 주기의 데이터 동기화 작업이 성공적으로 예약되었습니다.")
     }
 }
+
