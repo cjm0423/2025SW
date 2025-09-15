@@ -31,12 +31,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val firebaseRepository = FirebaseRepository()
 
     init {
-        // ✨ [변경] 각 데이터 로딩 함수를 명확하게 분리
+        // [변경] 각 데이터 로딩 함수를 명확하게 분리
         setupPlaceholders()
         fetchLocalWelfareData()
     }
 
-    // ✨ [변경] 초기 placeholder 설정 로직을 분리
+    // [추가] 인기 상품 리스트 가져오기
+    private  fun fetchPopularWelfateData() {
+        viewModelScope.launch {
+            try {
+                val popular = firebaseRepository.getPopularWelfareServices(limit = 10)
+                _popularList.value = popular
+            } catch (e: Exception) {
+                // 실패 시 placeholder 유지
+            }
+        }
+    }
+
+
+    // [변경] 초기 placeholder 설정 로직을 분리
     private fun setupPlaceholders() {
         val staticRegions = listOf(
             "서울시", "경기도", "강원도", "충청북도", "충청남도",
@@ -88,10 +101,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _regionInfoList.value = currentRegions.map { regionName ->
                     RegionInfo(name = regionName, policyCount = groupedData[regionName]?.size ?: 0)
                 }
-
-                // ✨ [삭제] 추천/인기 리스트를 업데이트하는 코드를 제거하여 분리
-                // _recommendList.value = policyList.take(3) -> 삭제
-                // _popularList.value = policyList.shuffled().take(3) -> 삭제
 
                 Log.d("MainViewModel", "성공 (지역 정책): ${policyList.size}개의 데이터를 Firestore에서 가져왔습니다.")
 

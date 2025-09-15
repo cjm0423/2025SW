@@ -1,6 +1,8 @@
 # IDE 설정
 *.iml
 .idea/
+.idea/gradle.xml
+
 
 # Gradle
 .gradle

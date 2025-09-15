@@ -58,7 +58,11 @@ class MainFragment : Fragment() {
 
         private fun setupRecyclerViews() {
                 recommendAdapter = HomeCardAdapter { /* TODO: 추천 상품 클릭 시 동작 */ }
-                popularAdapter = HomeCardAdapter { /* TODO: 인기 상품 클릭 시 동작 */ }
+                popularAdapter = HomeCardAdapter { item ->
+                        parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, PolicyDetailFragment.newInstance(item))
+                                .addToBackStack(null)
+                                .commit()}
 
                 // [수정 완료] 클릭된 카드의 servNm (서비스 이름)을 PolicyListFragment로 전달
                 policyAdapter = HomeCardAdapter { regionDto ->
