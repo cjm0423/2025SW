@@ -34,10 +34,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // [변경] 각 데이터 로딩 함수를 명확하게 분리
         setupPlaceholders()
         fetchLocalWelfareData()
+        fetchPopularWelfareData()
+        // fetchRecommendWelfareData()
     }
 
     // [추가] 인기 상품 리스트 가져오기
-    private  fun fetchPopularWelfateData() {
+    private  fun fetchPopularWelfareData() {
         viewModelScope.launch {
             try {
                 val popular = firebaseRepository.getPopularWelfareServices(limit = 10)

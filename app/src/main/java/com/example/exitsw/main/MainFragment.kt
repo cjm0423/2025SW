@@ -58,6 +58,7 @@ class MainFragment : Fragment() {
 
         private fun setupRecyclerViews() {
                 recommendAdapter = HomeCardAdapter { /* TODO: 추천 상품 클릭 시 동작 */ }
+
                 popularAdapter = HomeCardAdapter { item ->
                         parentFragmentManager.beginTransaction()
                                 .replace(R.id.fragment_container, PolicyDetailFragment.newInstance(item))
