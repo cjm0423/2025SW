@@ -1,9 +1,12 @@
 package com.example.exitsw
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -73,15 +76,28 @@ class ChatbotFragment : Fragment() {
             binding.spIncome.adapter = adapter
         }
 
+        // ✅ 엔터 키 누르면 키보드 닫기
+        binding.etAge.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+
         // 정책 추천 버튼 클릭 이벤트
         binding.btnRecommend.setOnClickListener {
+            // ✅ 버튼 누르면 키보드 닫기
+            hideKeyboard()
+
             val gender = binding.spGender.selectedItem.toString()
             val age = binding.etAge.text.toString().toIntOrNull() ?: -1
             val region = binding.spRegion.selectedItem.toString()
             val income = binding.spIncome.selectedItem.toString()
 
             if (age < 0 || region.isBlank() || income.isBlank()) {
-                addBotMessage("입력값을 올바르게 입력해주세요.")
+                chatAdapter.addItem(ChatItem.BotMessage("입력값을 올바르게 입력해주세요."))
             } else {
                 fetchPoliciesFromFirestore(gender, age, region, income)
             }
@@ -106,7 +122,7 @@ class ChatbotFragment : Fragment() {
             .collection("items")
             .get()
             .addOnSuccessListener { result ->
-                val matchedPolicies = mutableListOf<Pair<String, String>>() // (정책명, 링크)
+                var found = false
 
                 for (doc in result) {
                     val data = doc.data
@@ -141,29 +157,31 @@ class ChatbotFragment : Fragment() {
 
                     if (ageMatch && regionMatch && genderMatch && incomeMatch) {
                         val title = data["servNm"] as? String ?: "정책명 없음"
+                        val desc = data["servDgst"] as? String ?: "설명 없음"
                         val link = data["servDtlLink"] as? String ?: ""
-                        matchedPolicies.add(title to link)
+
+                        chatAdapter.addItem(ChatItem.PolicyMessage(title, desc, link))
+                        found = true
                     }
                 }
 
-                if (matchedPolicies.isEmpty()) {
-                    addBotMessage("조건에 맞는 정책을 찾지 못했어요.")
+                if (!found) {
+                    chatAdapter.addItem(ChatItem.BotMessage("조건에 맞는 정책을 찾지 못했어요."))
                 } else {
-                    matchedPolicies.forEach { (title, link) ->
-                        addBotMessage("추천 정책: <a href=\"$link\">$title</a>")
-                    }
-                    addBotMessage("✅ 추천이 모두 끝났습니다.")
+                    chatAdapter.addItem(ChatItem.BotMessage("✅ 추천이 모두 끝났습니다."))
                 }
+
+                binding.rvChatMessages.scrollToPosition(chatAdapter.itemCount - 1)
             }
             .addOnFailureListener {
-                addBotMessage("정책 데이터를 불러오는 중 오류가 발생했어요.")
+                chatAdapter.addItem(ChatItem.BotMessage("정책 데이터를 불러오는 중 오류가 발생했어요."))
             }
     }
 
-    /** 채팅창에 봇 메시지 추가 */
-    private fun addBotMessage(message: String) {
-        chatAdapter.addMessage(ChatMessage(message, false))
-        binding.rvChatMessages.scrollToPosition(chatAdapter.itemCount - 1)
+    /** ✅ 키보드 닫기 함수 */
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.etAge.windowToken, 0)
     }
 
     override fun onDestroyView() {
