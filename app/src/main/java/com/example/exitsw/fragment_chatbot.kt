@@ -1,9 +1,12 @@
 package com.example.exitsw
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -73,8 +76,21 @@ class ChatbotFragment : Fragment() {
             binding.spIncome.adapter = adapter
         }
 
+        // ✅ 엔터 키 누르면 키보드 닫기
+        binding.etAge.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+
         // 정책 추천 버튼 클릭 이벤트
         binding.btnRecommend.setOnClickListener {
+            // ✅ 버튼 누르면 키보드 닫기
+            hideKeyboard()
+
             val gender = binding.spGender.selectedItem.toString()
             val age = binding.etAge.text.toString().toIntOrNull() ?: -1
             val region = binding.spRegion.selectedItem.toString()
@@ -160,6 +176,12 @@ class ChatbotFragment : Fragment() {
             .addOnFailureListener {
                 chatAdapter.addItem(ChatItem.BotMessage("정책 데이터를 불러오는 중 오류가 발생했어요."))
             }
+    }
+
+    /** ✅ 키보드 닫기 함수 */
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.etAge.windowToken, 0)
     }
 
     override fun onDestroyView() {
