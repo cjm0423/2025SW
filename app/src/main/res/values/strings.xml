@@ -1,4 +1,5 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="app_name">ExitSW</string>
     <string name="kakao_app_scheme">kakaoe86dd12ba7f7476869191c601f9e51f4</string>
     <string name="textSavinglist">상품 목록</string>
@@ -7,5 +8,9 @@
     <string name="textOnelineEx">한 줄 설명</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="policy_title_sample" tools:ignore="MissingTranslation">정책명</string>
+    <string name="policy_desc_sample" tools:ignore="MissingTranslation">간단한 정책 설명이 들어갑니다.</string>
+    <string name="policy_link_text" tools:ignore="MissingTranslation">자세히 보기</string>
 
 </resources>
