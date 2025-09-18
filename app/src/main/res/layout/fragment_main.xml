@@ -34,17 +34,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintDimensionRatio="H,16:9"/>
 
-                <ImageButton
-                    android:id="@+id/btn_notification"
-                    style="@style/NoBackground_ImageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:src="@drawable/ic_notifications"
-                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
-                    tools:layout_editor_absoluteX="371dp"
-                    app:layout_constraintEnd_toEndOf="@+id/bannerImage"/>
-
                 <TextView
                     android:id="@+id/todayDateText"
                     android:layout_width="wrap_content"

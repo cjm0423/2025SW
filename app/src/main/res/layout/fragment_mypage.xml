@@ -78,16 +78,6 @@
                     tools:layout_editor_absoluteX="0dp"
                     android:layout_marginStart="10dp">
 
-                    <!-- 캘린더 버튼 -->
-                    <Button
-                        android:id="@+id/btn_calendar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/your_theme_color"
-                        android:padding="8dp"
-                        android:text="캘린더"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp" />
 
                     <!-- 프로필 수정 버튼 -->
                     <Button
