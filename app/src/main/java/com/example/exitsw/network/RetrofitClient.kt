@@ -11,7 +11,7 @@ import java.io.File
 
 object RetrofitClient {
     // private const val BASE_URL = "http://20.22.129.6:8080"
-    private const val BASE_URL = "http://172.30.1.60:8080"
+    private const val BASE_URL = "http://10.0.0.2:8080"
 
     private var instance: WelfareApiService? = null
 

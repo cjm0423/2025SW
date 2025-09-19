@@ -46,6 +46,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var actvKeyword: MaterialAutoCompleteTextView
     private lateinit var tilGender: TextInputLayout
     private lateinit var btnEditProfile: MaterialButton
+    private lateinit var btnGoWithdraw: MaterialButton   // ✅ 추가
 
     // 포맷터
     private val ymd by lazy {
@@ -78,6 +79,11 @@ class EditProfileActivity : AppCompatActivity() {
 
         // 저장
         btnEditProfile.setOnClickListener { saveProfile() }
+
+        // ✅ 회원 탈퇴 화면으로 이동
+        btnGoWithdraw.setOnClickListener {
+            startActivity(Intent(this, WithdrawActivity::class.java))
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -94,6 +100,7 @@ class EditProfileActivity : AppCompatActivity() {
         actvKeyword    = findViewById(R.id.actvKeyword)
         tilGender      = findViewById(R.id.tilGender)
         btnEditProfile = findViewById(R.id.btnEditProfile)
+        btnGoWithdraw  = findViewById(R.id.btnGoWithdraw) // ✅ 추가
     }
 
     private fun setupDropdowns() {
@@ -193,8 +200,8 @@ class EditProfileActivity : AppCompatActivity() {
 
                 val nickname = snap.getString("nickname")
                 val gender   = snap.getString("gender")
-                val birthRaw = snap.get("birth")                 // Timestamp/Date/Number/String 다 대응
-                val region   = snap.getString("region_label")    // ✅ 필드명 통일
+                val birthRaw = snap.get("birth")
+                val region   = snap.getString("region_label")
                 val income   = snap.getString("income")
                 val interest = snap.getString("interest")
 
@@ -203,7 +210,7 @@ class EditProfileActivity : AppCompatActivity() {
                 // 화면 채우기
                 nickname?.let { editNickname.setText(it) }
                 birthYmd?.let { etBirth.setText(it) }
-                gender?.let   { actvGender.setText(it, false) }  // 읽기 전용
+                gender?.let   { actvGender.setText(it, false) }
                 region?.let   { actvRegion.setText(it, false) }
                 income?.let   { actvIncome.setText(it, false) }
                 interest?.let { actvKeyword.setText(it, false) }
@@ -252,7 +259,7 @@ class EditProfileActivity : AppCompatActivity() {
         if (newBirthStr.isNotBlank() && newBirthStr != initBirthYmd) {
             val birthDate = parseYmdToDate(newBirthStr)
             if (birthDate != null) {
-                updates["birth"] = birthDate               // Firestore Timestamp로 저장됨
+                updates["birth"] = birthDate
                 updates["age_years"] = calculateAge(birthDate)
             } else {
                 Toast.makeText(this, "생년월일 형식이 올바르지 않습니다. (YYYY-MM-DD)", Toast.LENGTH_SHORT).show()
@@ -266,12 +273,11 @@ class EditProfileActivity : AppCompatActivity() {
             return
         }
 
-        // 항상 업데이트 시간 포함
         updates["updatedAt"] = FieldValue.serverTimestamp()
 
         Log.d(TAG, "Upserting $path with $updates")
         db.collection("user").document(u.uid)
-            .set(updates, SetOptions.merge())   // 변경된 필드만 머지 (문서 없어도 upsert)
+            .set(updates, SetOptions.merge())
             .addOnSuccessListener {
                 Toast.makeText(this, "프로필을 수정했어요.", Toast.LENGTH_SHORT).show()
                 setResult(RESULT_OK, Intent().putExtra("updated", true))

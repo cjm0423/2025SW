@@ -60,7 +60,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:maxWidth="360dp"
-            android:hint="성별"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -205,6 +204,18 @@
             android:maxWidth="360dp"
             android:backgroundTint="#FEE500"
             android:text="프로필 수정"
+            android:textColor="#000000"
+            app:cornerRadius="8dp"/>
+
+        <!-- 5) 회원 탈퇴 버튼 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGoWithdraw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:maxWidth="360dp"
+            android:backgroundTint="#E4E4E4"
+            android:text="회원 탈퇴"
             android:textColor="#000000"
             app:cornerRadius="8dp"/>
 

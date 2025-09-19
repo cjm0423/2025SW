@@ -19,11 +19,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".EditProfileActivity"
+            android:name=".WithdrawActivity"
             android:exported="false" />
         <activity
-            android:name=".EditProfile"
-            android:exported="false" /> <!-- Kakao SDK App Key -->
+            android:name=".EditProfileActivity"
+            android:exported="false" />
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="${KAKAO_APP_KEY}" /> <!-- 카카오 OAuth Redirect 처리용 액티비티 -->
