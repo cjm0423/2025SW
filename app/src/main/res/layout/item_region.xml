@@ -21,7 +21,6 @@
             android:id="@+id/imgRegion"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:background="#E0E0E0"
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -52,7 +51,6 @@
             app:layout_constraintTop_toBottomOf="@id/textRegionName"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- ✨ [수정] 정책 개수 또는 상태 메시지를 표시할 TextView -->
         <TextView
             android:id="@+id/textPolicyCount"
             android:layout_width="wrap_content"

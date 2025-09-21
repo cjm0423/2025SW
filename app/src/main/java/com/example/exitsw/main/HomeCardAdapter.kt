@@ -5,10 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.ItemHomeCardBinding
 import com.example.exitsw.util.PolicyIconMapper
+import com.example.exitsw.util.RegionIconMapper
 
 class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit) : ListAdapter<LocalWelfareServiceDto, HomeCardAdapter.HomeCardViewHolder>(DiffCallback) {
 
@@ -24,7 +24,8 @@ class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Uni
             binding.textCardSubtitle.text = item.bizChrDeptNm ?: ""
 
             if (item.bizChrDeptNm == "정책 목록 보기") {
-                binding.imgCard.setImageResource(R.drawable.ic_ai)
+                val iconResId = RegionIconMapper.getIconResourceId(item.servNm)
+                binding.imgCard.setImageResource(iconResId)
             } else {
                 val iconResId = PolicyIconMapper.getIconResourceId(item)
                 binding.imgCard.setImageResource(iconResId)
