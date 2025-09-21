@@ -8,13 +8,21 @@
     android:orientation="vertical"
     android:background="@android:color/white">
 
-    <!-- 상단 툴바 -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:title="지역별 정책 목록"
-        app:navigationIcon="@drawable/ic_arrow_back" /> <!-- 뒤로가기 아이콘 (ic_arrow_back.xml 필요) -->
+        android:layout_height="wrap_content"
+        android:background="@android:color/white">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@android:color/black"
+            app:title="지역별 정책"
+            app:titleTextColor="@android:color/black" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/regionRecyclerView"
