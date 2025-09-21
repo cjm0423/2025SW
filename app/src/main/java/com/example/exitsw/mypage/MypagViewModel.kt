@@ -3,20 +3,27 @@ package com.example.exitsw.mypage
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.exitsw.data.LocalWelfareServiceDto
+import com.example.exitsw.repository.FirebaseRepository
+import com.google.firebase.auth.FirebaseAuth
+
 
 class MypageViewModel : ViewModel() {
-    private val _productList = MutableLiveData<List<ProductItem>>()
-    val productList: LiveData<List<ProductItem>> get() = _productList
 
-    init {
-        loadProducts()
-    }
+    private val auth = FirebaseAuth.getInstance()
+    private val repo = FirebaseRepository()
 
-    private fun loadProducts() {
-        // DB or API에서 로딩했다고 가정
-        _productList.value = listOf(
-            ProductItem("청년적금", "국민은행", "...", 4.5f, true),
-            ProductItem("내일채움공제", "IBK", "...", 3.5f, false)
-        )
+    // LiveData: 관심 목록
+    private val _favoriteList = MutableLiveData<List<LocalWelfareServiceDto>>()
+    val favoriteList: LiveData<List<LocalWelfareServiceDto>> get() = _favoriteList
+
+    /**
+     * 관심 목록 실시간 관찰 시작
+     */
+    fun startObserveFavorites() {
+        val uid = auth.currentUser?.uid ?: return
+        repo.observeFavorites(uid) { list ->
+            _favoriteList.postValue(list)
+        }
     }
 }
