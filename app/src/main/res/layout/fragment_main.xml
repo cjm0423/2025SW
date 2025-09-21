@@ -18,7 +18,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 상단 배너 ConstraintLayout -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -48,7 +47,6 @@
                     android:layout_marginBottom="12dp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- 추천 상품 섹션 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -56,6 +54,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/textRecommendTitle"
                     android:text="추천 상품 ➔"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -74,7 +73,6 @@
                     tools:itemCount="3"/>
             </LinearLayout>
 
-            <!-- 인기 상품 섹션 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -82,6 +80,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/textPopularTitle"
                     android:text="인기 상품 ➔"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -100,7 +99,6 @@
                     tools:itemCount="3"/>
             </LinearLayout>
 
-            <!-- 지역별 지원 정책 섹션 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

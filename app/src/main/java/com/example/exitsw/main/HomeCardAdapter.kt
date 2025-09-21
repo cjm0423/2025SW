@@ -5,8 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.ItemHomeCardBinding
+import com.example.exitsw.util.PolicyIconMapper
 
 class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit) : ListAdapter<LocalWelfareServiceDto, HomeCardAdapter.HomeCardViewHolder>(DiffCallback) {
 
@@ -18,9 +20,15 @@ class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Uni
         }
 
         fun bind(item: LocalWelfareServiceDto) {
-            // [수정] serviceName -> servNm, department -> bizChrDeptNm 으로 변경
             binding.textCardTitle.text = item.servNm ?: "정보 없음"
             binding.textCardSubtitle.text = item.bizChrDeptNm ?: ""
+
+            if (item.bizChrDeptNm == "정책 목록 보기") {
+                binding.imgCard.setImageResource(R.drawable.ic_ai)
+            } else {
+                val iconResId = PolicyIconMapper.getIconResourceId(item)
+                binding.imgCard.setImageResource(iconResId)
+            }
         }
     }
 
@@ -36,7 +44,6 @@ class HomeCardAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Uni
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<LocalWelfareServiceDto>() {
             override fun areItemsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
-                // [수정] serviceId -> servId 로 변경
                 return oldItem.servId == newItem.servId
             }
             override fun areContentsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {

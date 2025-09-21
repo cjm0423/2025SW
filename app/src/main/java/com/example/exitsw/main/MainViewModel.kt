@@ -31,27 +31,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val firebaseRepository = FirebaseRepository()
 
     init {
-        // [변경] 각 데이터 로딩 함수를 명확하게 분리
         setupPlaceholders()
         fetchLocalWelfareData()
         fetchPopularWelfareData()
-        // fetchRecommendWelfareData()
     }
 
-    // [추가] 인기 상품 리스트 가져오기
     private  fun fetchPopularWelfareData() {
         viewModelScope.launch {
             try {
-                val popular = firebaseRepository.getPopularWelfareServices(limit = 10)
+                val popular = firebaseRepository.getPopularWelfareServices(limit = 30)
                 _popularList.value = popular
+
+                popular.forEach { item ->
+                    Log.d("MainViewModel", "[인기상품 데이터] Title: ${item.servNm}, Category: ${item.intrsThemaNmArray}")
+                }
+
             } catch (e: Exception) {
-                // 실패 시 placeholder 유지
+                Log.e("MainViewModel", "인기상품 데이터 로딩 실패: ${e.message}")
             }
         }
     }
 
-
-    // [변경] 초기 placeholder 설정 로직을 분리
     private fun setupPlaceholders() {
         val staticRegions = listOf(
             "서울시", "경기도", "강원도", "충청북도", "충청남도",
@@ -67,7 +67,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         _regionInfoList.value = staticRegions.map { RegionInfo(name = it, policyCount = null) }
 
-        // 추천 및 인기 상품은 "준비 중"으로 표시
         val placeholder = LocalWelfareServiceDto(servId = "COMING_SOON", servNm = "서비스 준비 중", bizChrDeptNm = "곧 만나요!")
         _recommendList.value = listOf(placeholder, placeholder, placeholder)
         _popularList.value = listOf(placeholder, placeholder, placeholder)
@@ -90,7 +89,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // ✨ [변경] 이 함수는 이제 지역별 정책 데이터만 처리
     private fun fetchLocalWelfareData() {
         viewModelScope.launch {
             try {

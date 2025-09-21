@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyDetailBinding
+import com.example.exitsw.util.PolicyIconMapper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -63,7 +64,9 @@ class PolicyDetailFragment : Fragment() {
             ?: throw IllegalStateException("User must be logged in before entering PolicyDetailFragment")
 
         policy?.let { p ->
-            // [수정] UI 바인딩 시 변경된 변수 이름을 사용합니다.
+            val iconResId = PolicyIconMapper.getIconResourceId(p)
+            binding.imgPolicy.setImageResource(iconResId)
+
             binding.toolbar.title = p.servNm
             binding.textPolicyName.text = p.servNm
             binding.textPolicyAgency.text = p.bizChrDeptNm
@@ -90,7 +93,6 @@ class PolicyDetailFragment : Fragment() {
 
             binding.btnFavorite.setOnClickListener { toggleFavorite() }
 
-            // [수정] "신청하러 가기" 버튼에서 변경된 변수 이름을 사용합니다.
             binding.btnGoToSite.setOnClickListener {
                 p.servDtlLink?.let { url ->
                     if (url.isNotBlank()) {
@@ -143,7 +145,6 @@ class PolicyDetailFragment : Fragment() {
             val type = object : TypeToken<Map<String, Any?>>() {}.type
             val map: Map<String, Any?> = gson.fromJson(json, type)
 
-            // [수정] DTO의 변경된 변수 이름(servId)을 최우선으로 사용하도록 변경
             val candidate = listOf("servId", "svcId", "id", "service_id", "no")
                 .firstNotNullOfOrNull { k -> map[k]?.toString()?.takeIf { it.isNotBlank() } }
 

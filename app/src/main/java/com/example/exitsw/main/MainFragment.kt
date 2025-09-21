@@ -54,6 +54,13 @@ class MainFragment : Fragment() {
                                 .addToBackStack(null)
                                 .commit()
                 }
+
+                binding.textPopularTitle.setOnClickListener {
+                        parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, PopularListFragment())
+                                .addToBackStack(null)
+                                .commit()
+                }
         }
 
         private fun setupRecyclerViews() {
@@ -65,7 +72,6 @@ class MainFragment : Fragment() {
                                 .addToBackStack(null)
                                 .commit()}
 
-                // [수정 완료] 클릭된 카드의 servNm (서비스 이름)을 PolicyListFragment로 전달
                 policyAdapter = HomeCardAdapter { regionDto ->
                         parentFragmentManager.beginTransaction()
                                 .replace(R.id.fragment_container, PolicyListFragment.newInstance(regionDto.servNm ?: ""))

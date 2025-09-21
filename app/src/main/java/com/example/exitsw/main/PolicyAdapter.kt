@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.ItemPolicyBinding
+import com.example.exitsw.util.PolicyIconMapper
 
 class PolicyAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit) : ListAdapter<LocalWelfareServiceDto, PolicyAdapter.PolicyViewHolder>(DiffCallback) {
 
@@ -17,10 +18,12 @@ class PolicyAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit)
             }
         }
         fun bind(policy: LocalWelfareServiceDto) {
-            // [수정] DTO 클래스의 변경된 변수 이름으로 교체
             binding.textPolicyName.text = policy.servNm ?: "정보 없음"
             binding.textPolicyAgency.text = policy.bizChrDeptNm ?: ""
             binding.textPolicySummary.text = policy.servDgst ?: ""
+
+            val iconResId = PolicyIconMapper.getIconResourceId(policy)
+            binding.imgPolicy.setImageResource(iconResId)
         }
     }
 
@@ -36,7 +39,6 @@ class PolicyAdapter(private val onItemClicked: (LocalWelfareServiceDto) -> Unit)
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<LocalWelfareServiceDto>() {
             override fun areItemsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
-                // [수정] DTO 클래스의 변경된 변수 이름으로 교체
                 return oldItem.servId == newItem.servId
             }
             override fun areContentsTheSame(oldItem: LocalWelfareServiceDto, newItem: LocalWelfareServiceDto): Boolean {
