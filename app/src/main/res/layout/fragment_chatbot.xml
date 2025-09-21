@@ -5,42 +5,57 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- 성별 선택 -->
-    <Spinner
-        android:id="@+id/spGender"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:entries="@array/gender_options"
-        android:layout_marginBottom="12dp" />
-
-    <!-- 나이 입력 -->
+    <!-- 자유문 입력: 예) "나는 서울 50세 남성이야" -->
     <EditText
-        android:id="@+id/etAge"
+        android:id="@+id/etUserText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="나이를 입력하세요"
-        android:inputType="number"
+        android:hint="예) 나는 서울 50세 남성이고 저소득층이야"
         android:imeOptions="actionDone"
-        android:importantForAutofill="no"
+        android:inputType="text"
         android:layout_marginBottom="12dp" />
 
-    <!-- 지역 선택 -->
-    <Spinner
-        android:id="@+id/spRegion"
+    <!-- (미래용) 고급 필터 영역: 현재는 숨김 -->
+    <LinearLayout
+        android:id="@+id/panelAdvanced"
+        android:orientation="vertical"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/kor_regions"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="12dp">
 
-    <!-- 소득분위 선택 -->
-    <Spinner
-        android:id="@+id/spIncome"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:entries="@array/income_brackets"
-        android:layout_marginBottom="16dp" />
+        <Spinner
+            android:id="@+id/spGender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/gender_options"
+            android:layout_marginBottom="12dp" />
 
-    <!-- 정책 추천 버튼 -->
+        <EditText
+            android:id="@+id/etAge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="나이를 입력하세요"
+            android:inputType="number"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no"
+            android:layout_marginBottom="12dp" />
+
+        <Spinner
+            android:id="@+id/spRegion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/kor_regions"
+            android:layout_marginBottom="12dp" />
+
+        <Spinner
+            android:id="@+id/spIncome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/income_brackets"
+            android:layout_marginBottom="8dp" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/btnRecommend"
         android:layout_width="match_parent"
@@ -48,7 +63,6 @@
         android:text="정책 추천 받기"
         android:layout_marginBottom="12dp" />
 
-    <!-- 채팅 메시지 리스트 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChatMessages"
         android:layout_width="match_parent"

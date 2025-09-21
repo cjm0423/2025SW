@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit
 object WelfareApiToFirebase {
 
     private const val TAG = "WelfareSync"
-    private const val BASE_URL = "http://172.30.1.60:8080/"
+    private const val BASE_URL = "http://172.20.10.2:8080/"
     private const val PATH_LOCAL_WELFARE = "/api/welfare/local/services"
 
     private val KOREA_SIGUNGU_CODES = listOf(
