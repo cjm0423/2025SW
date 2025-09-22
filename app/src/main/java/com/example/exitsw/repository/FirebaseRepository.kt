@@ -17,7 +17,7 @@ class FirebaseRepository {
             val snapshot = db.collection("policies")
                 .document("all")
                 .collection("items")
-                .limit(500)
+                .limit(1000) // 데이터 불러오는 갯수
                 .get()
                 .await()
 

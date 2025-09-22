@@ -5,52 +5,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="12dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginBottom="10dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="#F1F3F5">
+    android:foreground="?attr/selectableItemBackground">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_height="160dp">
 
+        <!-- 메인 이미지 -->
         <ImageView
             android:id="@+id/imgRegion"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:contentDescription="지역 아이콘/사진"
+            tools:src="@drawable/ic_launcher_foreground" />
 
-        <TextView
-            android:id="@+id/textRegionName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            tools:text="서울시"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/imgRegion"
-            app:layout_constraintTop_toTopOf="@id/imgRegion"
-            app:layout_constraintBottom_toTopOf="@+id/textPolicyCount"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <TextView
-            android:id="@+id/textPolicyCount"
+        <!-- 텍스트 컨테이너: 왼쪽 정렬 -->
+        <LinearLayout
+            android:id="@+id/textContainer"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="12개 정책"
-            android:textColor="@android:color/holo_blue_dark"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/textRegionName"
-            app:layout_constraintBottom_toBottomOf="@id/imgRegion"
-            app:layout_constraintTop_toBottomOf="@id/textRegionName"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:layout_gravity="start|center_vertical">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/textRegionName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="서울시" />
+
+            <TextView
+                android:id="@+id/textPolicyCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#19B5FE"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                tools:text="72개 정책" />
+        </LinearLayout>
+
+    </FrameLayout>
 </com.google.android.material.card.MaterialCardView>
