@@ -6,10 +6,11 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.button.MaterialButton
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.OAuthCredential
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -19,22 +20,50 @@ class LoginActivity : AppCompatActivity() {
         private const val TAG = "LoginActivity"
         const val EXTRA_UID = "uid"
         const val EXTRA_NICKNAME = "nickname"
-        private const val OIDC_PROVIDER_ID = "oidc.kakao" // 콘솔 Provider ID = 'kakao'라면 'oidc.kakao'
+        private const val OIDC_PROVIDER_ID = "oidc.kakao" // Firebase 콘솔 Provider ID 기준
     }
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
+    // 중복 호출 방지 플래그
+    private var signingIn = false
+
+    private val btnKakaoLogin: ImageButton by lazy { findViewById(R.id.btnKakaoLogin) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val btnKakaoLogin = findViewById<ImageButton>(R.id.btnKakaoLogin)
-        // ✅ 세션이 있어도 우회하지 말고 항상 OIDC 시작 (계정 선택창 강제)
-        val loginListener = {
-            startKakaoOidcSignIn(forcePrompt = true, selectAccount = true)
+        // 기본: prompt 미지정(불필요한 계정 선택 UI 감소)
+        btnKakaoLogin.setOnClickListener {
+            startKakaoOidcSignIn(forcePrompt = false, selectAccount = false)
         }
-        btnKakaoLogin.setOnClickListener { loginListener.invoke() }
+
+        // 진행 중이었으면 복구 시도
+        auth.pendingAuthResult?.let {
+            setSigningIn(true)
+            it.addOnSuccessListener { res -> handleAuthResult(res) }
+                .addOnFailureListener { t -> showAuthError(t) }
+        }
+    }
+
+    /** 로그인 버튼 상태 토글 */
+    private fun setSigningIn(inProgress: Boolean) {
+        signingIn = inProgress
+        btnKakaoLogin.isEnabled = !inProgress
+    }
+
+    /** Google Play services 상태 점검: 미설치/구버전이면 사용자에게 안내하고 로그인 시작 차단 */
+    private fun ensurePlayServicesOrExplain(): Boolean {
+        val api = GoogleApiAvailability.getInstance()
+        val code = api.isGooglePlayServicesAvailable(this)
+        return if (code == ConnectionResult.SUCCESS) {
+            true
+        } else {
+            api.getErrorDialog(this, code, /*requestCode=*/1001)?.show()
+            false
+        }
     }
 
     /** Firebase Auth - OIDC(Kakao) 로그인 시작 */
@@ -42,17 +71,18 @@ class LoginActivity : AppCompatActivity() {
         forcePrompt: Boolean = false,
         selectAccount: Boolean = false
     ) {
-        val builder = OAuthProvider.newBuilder(OIDC_PROVIDER_ID).apply {
-            // ⚠ OIDC 'prompt' 파라미터: select_account가 있으면 계정 선택 UI를 우선 유도
+        if (signingIn) return
+        if (!ensurePlayServicesOrExplain()) return  // ▶ Play Services 비정상 시 중단
+
+        setSigningIn(true)
+
+        val provider = OAuthProvider.newBuilder(OIDC_PROVIDER_ID).apply {
             when {
                 selectAccount -> addCustomParameter("prompt", "select_account")
                 forcePrompt   -> addCustomParameter("prompt", "login")
             }
-            // 필요 시 스코프/클레임
-            // scopes = listOf("openid", "profile")
-            // addCustomParameter("max_age", "0") // 재인증 유도(지원 여부는 프로바이더에 따라 다름)
-        }
-        val provider = builder.build()
+            // (요청대로 스코프/클레임 설정 코드 제거)
+        }.build()
 
         val pending = auth.pendingAuthResult
         if (pending != null) {
@@ -67,33 +97,18 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleAuthResult(result: AuthResult) {
+        setSigningIn(false)
+
         val user = result.user
         if (user == null) {
             Toast.makeText(this, "로그인 실패: 사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val uid = user.uid
-        val displayName = user.displayName.orEmpty()
+        // 운영: 민감정보 최소화(토큰/페이로드 파싱/로그 남기지 않음)
+        Log.d(TAG, "Firebase uid=${user.uid}, name=${user.displayName.orEmpty()}")
 
-        // (선택) Kakao 'sub' 추출
-        val kakaoSub: String? = (result.credential as? OAuthCredential)?.idToken?.let { jwt ->
-            try {
-                val parts = jwt.split(".")
-                if (parts.size >= 2) {
-                    val payloadJson = String(
-                        android.util.Base64.decode(
-                            parts[1],
-                            android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP
-                        )
-                    )
-                    Regex(""""sub"\s*:\s*"([^"]+)"""").find(payloadJson)?.groupValues?.getOrNull(1)
-                } else null
-            } catch (_: Exception) { null }
-        }
-        Log.d(TAG, "Firebase uid=$uid, kakao sub=$kakaoSub, name=$displayName")
-
-        routeByProfile(uid, displayName)
+        routeByProfile(user.uid, user.displayName.orEmpty())
     }
 
     private fun routeByProfile(uid: String, nicknameHint: String) {
@@ -118,7 +133,21 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun showAuthError(t: Throwable) {
-        Log.e(TAG, "OIDC 로그인 실패", t)
-        Toast.makeText(this, "로그인 실패: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
+        setSigningIn(false)
+
+        val code = (t as? FirebaseAuthException)?.errorCode
+        Log.e(TAG, "OIDC 로그인 실패: code=$code, msg=${t.localizedMessage}", t)
+
+        when (code) {
+            "ERROR_WEB_CONTEXT_CANCELED" -> {
+                Toast.makeText(this, "로그인이 취소되었어요. 다시 시도해 주세요.", Toast.LENGTH_SHORT).show()
+            }
+            "ERROR_NETWORK_REQUEST_FAILED" -> {
+                Toast.makeText(this, "네트워크가 불안정해요. 잠시 후 다시 시도해 주세요.", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                Toast.makeText(this, "로그인에 실패했어요. 다시 시도해 주세요.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
