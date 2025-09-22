@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.EditProfileActivity
 import com.example.exitsw.R
+import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentMypageBinding
 import com.example.exitsw.main.PolicyDetailFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -48,14 +48,33 @@ class MypageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 관심 목록 RecyclerView
+        adapter = FavoriteAdapter { dto: LocalWelfareServiceDto ->
+            val fragment = PolicyDetailFragment.newInstance(dto) // ✅ dto 통째로 전달
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment) // 실제 컨테이너 id 확인 필요
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.rvFavorites.apply {
+            layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+            setHasFixedSize(false)
+            isNestedScrollingEnabled = false
+            adapter = this@MypageFragment.adapter
+        }
+
+        val divider = DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
+        divider.setDrawable(
+            ContextCompat.getDrawable(requireContext(), R.drawable.divider_gray)!!
+        )
+        binding.rvFavorites.addItemDecoration(divider)
+
         // LiveData 구독
         viewModel.favoriteList.observe(viewLifecycleOwner) { list ->
-            adapter.submitList(
-                list.map { dto ->
-                    FavoritePolicy(servId = dto.servId ?: "", servNm = dto.servNm ?: "")
-                }
-            )
+            adapter.submitList(list)
         }
+
         viewModel.userProfile.observe(viewLifecycleOwner) { profile ->
             if (profile != null) {
                 binding.tvNickname.text = profile.nickname
@@ -72,21 +91,6 @@ class MypageFragment : Fragment() {
             editProfileLauncher.launch(intent)
         }
 
-        // 관심 목록 RecyclerView
-        adapter = FavoriteAdapter { policy ->
-            openPolicyDetail(policy.servId, policy.servNm)
-        }
-        binding.rvFavorites.apply {
-            layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-            setHasFixedSize(false)
-            isNestedScrollingEnabled = false
-            adapter = this@MypageFragment.adapter
-        }
-
-        val divider = DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
-        divider.setDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.divider_gray)!!)
-        binding.rvFavorites.addItemDecoration(divider)
-
         // 로그아웃
         binding.btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
@@ -98,16 +102,6 @@ class MypageFragment : Fragment() {
         super.onStart()
         viewModel.startObserveUser()
         viewModel.startObserveFavorites()
-    }
-
-    private fun openPolicyDetail(servId: String, servNm: String) {
-        val fragment = PolicyDetailFragment().apply {
-            arguments = bundleOf("servId" to servId, "servNm" to servNm)
-        }
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment) // 실제 컨테이너 id 확인 필요
-            .addToBackStack(null)
-            .commit()
     }
 
     override fun onDestroyView() {
