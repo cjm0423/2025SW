@@ -31,17 +31,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintDimensionRatio="H,16:9"/>
 
-                <ImageButton
-                    android:id="@+id/btn_back"
-                    style="@style/NoBackground_ImageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_arrow_back"
-                    app:layout_constraintTop_toTopOf="@id/bannerImage"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="10dp"/>
-
                 <TextView
                     android:id="@+id/UserNameText"
                     android:layout_width="wrap_content"
