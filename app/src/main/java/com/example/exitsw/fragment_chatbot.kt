@@ -8,11 +8,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.exitsw.ai.GeminiClient
 import com.example.exitsw.databinding.FragmentChatbotBinding
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.exitsw.main.PolicyListFragment
 
 class ChatbotFragment : Fragment() {
 
@@ -42,7 +44,20 @@ class ChatbotFragment : Fragment() {
         )
 
         // RecyclerView
-        chatAdapter = ChatMessageAdapter()
+        chatAdapter = ChatMessageAdapter { policy ->
+            // ✅ "자세히 보기" → 앱 내부 정책 목록으로 이동 + 해당 항목 포커스/자동 상세
+            val args = bundleOf(
+                "regionName" to null,              // 필요시 지역 지정 가능
+                "filterLink" to policy.link,       // servDtlLink로 매칭
+                "filterTitle" to policy.title,     // 보조 키
+                "autoOpenDetail" to true           // 스크롤 후 상세 자동 열기
+            )
+            val frag = PolicyListFragment().apply { arguments = args }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, frag) // 호스트 컨테이너 id 확인
+                .addToBackStack(null)
+                .commit()
+        }
         binding.rvChatMessages.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatMessages.adapter = chatAdapter
 
@@ -300,7 +315,6 @@ class ChatbotFragment : Fragment() {
             "청소년" -> life.any { it.contains("아동") || it.contains("청소년") }
             else -> true
         }
-        // 필요시 23세 → '청소년' 정책 컷 보장
     }
 
     /** 소득 하드 컷: 상위소득(high)이면 저소득 키워드 포함 정책은 컷 */

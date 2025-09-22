@@ -13,7 +13,10 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 
-class ChatMessageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatMessageAdapter(
+    /** 정책 카드 클릭 시 내부 화면으로 연결하기 위한 콜백 (없으면 외부 브라우저로 폴백) */
+    private val onPolicyClick: ((ChatItem.PolicyMessage) -> Unit)? = null
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<ChatItem>()
 
@@ -100,7 +103,7 @@ class ChatMessageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class MessageVH(root: FrameLayout, val tv: TextView) : RecyclerView.ViewHolder(root)
 
-    class PolicyVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class PolicyVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val title = itemView.findViewById<TextView>(R.id.tvPolicyTitle)
         private val desc = itemView.findViewById<TextView>(R.id.tvPolicyDesc)
         private val linkBtn = itemView.findViewById<TextView>(R.id.btnPolicyLink)
@@ -110,23 +113,27 @@ class ChatMessageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             title.text = item.title
             desc.text = item.desc
 
-            val hasLink = !item.link.isNullOrBlank()
-            linkBtn.isVisible = hasLink
-            imgLink.isVisible = hasLink
+            // 내부 화면으로 보낼 거라 버튼은 항상 보이게
+            linkBtn.isVisible = true
+            imgLink.isVisible = true
 
-            if (hasLink) {
-                val clickListener = View.OnClickListener {
+            val clickListener = View.OnClickListener {
+                // 1) 내부 화면 콜백 우선
+                if (onPolicyClick != null) {
+                    onPolicyClick.invoke(item)
+                    return@OnClickListener
+                }
+                // 2) 폴백: 콜백이 없으면 외부 브라우저로 링크 열기
+                val link = item.link
+                if (!link.isNullOrBlank()) {
                     runCatching {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
                         itemView.context.startActivity(intent)
                     }
                 }
-                linkBtn.setOnClickListener(clickListener)
-                imgLink.setOnClickListener(clickListener)
-            } else {
-                linkBtn.setOnClickListener(null)
-                imgLink.setOnClickListener(null)
             }
+            linkBtn.setOnClickListener(clickListener)
+            imgLink.setOnClickListener(clickListener)
         }
     }
 }
