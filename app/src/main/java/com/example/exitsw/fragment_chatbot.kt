@@ -8,12 +8,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
-import androidx.core.os.bundleOf
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.exitsw.ai.GeminiClient
 import com.example.exitsw.databinding.FragmentChatbotBinding
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.exitsw.main.PolicyDetailFragment
 import com.example.exitsw.main.PolicyListFragment
 
 class ChatbotFragment : Fragment() {
@@ -24,10 +25,9 @@ class ChatbotFragment : Fragment() {
     private lateinit var chatAdapter: ChatMessageAdapter
     private lateinit var gemini: GeminiClient
 
-    // ✅ 세션 토큰: 오래된(이전) 응답 무시용
     @Volatile private var currentSessionId: Long = 0L
 
-    // ✅ LLM 점수 하한선: 0.60 미만은 결과에서 제거
+    // 하한선(60점): 0.60 미만은 표시하지 않음
     private val MIN_LLM_SCORE = 0.60
 
     override fun onCreateView(
@@ -43,21 +43,51 @@ class ChatbotFragment : Fragment() {
             generateEndpoint = BuildConfig.GEMINI_ENDPOINT
         )
 
-        // RecyclerView
+        // RecyclerView (정책 카드 클릭 시: Firestore에서 실제 정책 찾아 Detail로 연결)
         chatAdapter = ChatMessageAdapter { policy ->
-            // ✅ "자세히 보기" → 앱 내부 정책 목록으로 이동 + 해당 항목 포커스/자동 상세
-            val args = bundleOf(
-                "regionName" to null,              // 필요시 지역 지정 가능
-                "filterLink" to policy.link,       // servDtlLink로 매칭
-                "filterTitle" to policy.title,     // 보조 키
-                "autoOpenDetail" to true           // 스크롤 후 상세 자동 열기
-            )
-            val frag = PolicyListFragment().apply { arguments = args }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, frag) // 호스트 컨테이너 id 확인
-                .addToBackStack(null)
-                .commit()
+            val db = FirebaseFirestore.getInstance()
+            val title = policy.title.trim()
+
+            // 1) servNm = title 매칭으로 1건 조회
+            db.collection("policies").document("all")
+                .collection("items")
+                .whereEqualTo("servNm", title)
+                .limit(1)
+                .get()
+                .addOnSuccessListener { snap ->
+                    val doc = snap.documents.firstOrNull()
+                    val dto = doc?.toObject(com.example.exitsw.data.LocalWelfareServiceDto::class.java)
+
+                    if (dto != null) {
+                        // 실제 DTO로 앱 내부 상세 열기
+                        val detail = PolicyDetailFragment.newInstance(dto)
+                        parentFragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .add(R.id.fragment_container, detail, "PolicyDetail")
+                            .hide(this) // 챗봇은 숨겨 상태 유지 (뒤로가기 시 리스트/챗 기록 보존)
+                            .addToBackStack("PolicyDetail")
+                            .commit()
+                    } else {
+                        // 2) 폴백: 리스트 화면으로 이동해 제목으로 포커스 + 자동 상세 열기
+                        val listFrag = PolicyListFragment.newInstanceForDeeplink(
+                            regionName = null,
+                            filterLink = policy.link,      // 링크가 Firestore와 매칭되면 이걸로도 잡힘
+                            filterTitle = title,           // 제목 기준 포커스
+                            autoOpenDetail = true
+                        )
+                        parentFragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .add(R.id.fragment_container, listFrag, "PolicyListDeeplink")
+                            .hide(this)
+                            .addToBackStack("PolicyListDeeplink")
+                            .commit()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "정책 조회 중 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
+
         binding.rvChatMessages.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatMessages.adapter = chatAdapter
 
@@ -65,30 +95,26 @@ class ChatbotFragment : Fragment() {
         ArrayAdapter.createFromResource(
             requireContext(), R.array.gender_options, android.R.layout.simple_spinner_item
         ).also { ad -> ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); binding.spGender.adapter = ad }
-
         ArrayAdapter.createFromResource(
             requireContext(), R.array.kor_regions, android.R.layout.simple_spinner_item
         ).also { ad -> ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); binding.spRegion.adapter = ad }
-
         ArrayAdapter.createFromResource(
             requireContext(), R.array.income_brackets, android.R.layout.simple_spinner_item
         ).also { ad -> ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); binding.spIncome.adapter = ad }
 
-        // 자유입력 엔터 → 키보드 닫기
+        // 엔터 → 키보드 닫기
         binding.etUserText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) { hideKeyboard(binding.etUserText); true } else false
         }
 
-        // 추천 버튼: 새 세션 시작 + AI 전용 추천
+        // 추천 버튼
         binding.btnRecommend.setOnClickListener {
             hideKeyboard(binding.etUserText)
             val query = binding.etUserText.text?.toString()?.trim().orEmpty()
 
-            // 세션 갱신(오래된 응답 무시)
             currentSessionId = System.currentTimeMillis()
             val sessionId = currentSessionId
 
-            // UI 초기화
             chatAdapter.clearAll()
             chatAdapter.addItem(ChatItem.BotMessage("새 추천 세션을 시작합니다."))
 
@@ -102,16 +128,12 @@ class ChatbotFragment : Fragment() {
         return binding.root
     }
 
-    /**
-     * AI-전용 추천
-     * - 규칙: (1) 쿼리 힌트 추출 → (2) 하드 프리필터(연령/소득) → (3) LLM 평가
-     */
+    /** AI-전용 추천 */
     private fun recommendByLLM(userQuery: String, topK: Int, sessionId: Long) {
         val db = FirebaseFirestore.getInstance()
         chatAdapter.addItem(ChatItem.BotMessage("AI가 조건을 해석하고 정책을 평가 중…"))
 
-        // 0) 사용자 힌트 파싱
-        val hints = parseUserHints(userQuery)  // age/ageBand/gender/region/incomeDecile/incomeTier
+        val hints = parseUserHints(userQuery)
 
         db.collection("policies").document("all").collection("items")
             .get()
@@ -125,12 +147,12 @@ class ChatbotFragment : Fragment() {
                     return@addOnSuccessListener
                 }
 
-                // 1) 키워드 프리필터(150개) + 연령/소득 하드 컷
+                // 1) 프리필터
                 val tokens = extractQueryTokens(userQuery)
                 val preRanked = allDocs
                     .asSequence()
-                    .filter { hardAgePass(it, hints.ageBand) }         // 🔒 20대면 ‘노인/아동’ 컷
-                    .filter { hardIncomePass(it, hints.incomeTier) }   // 🔒 상위소득이면 ‘저소득’ 컷
+                    .filter { hardAgePass(it, hints.ageBand) }
+                    .filter { hardIncomePass(it, hints.incomeTier) }
                     .map { doc ->
                         val d = doc.data ?: emptyMap<String, Any?>()
                         val text = buildPolicyText(d)
@@ -141,26 +163,22 @@ class ChatbotFragment : Fragment() {
                     .take(150)
                     .toList()
 
-                // 2) LLM 평가 후보 30개
+                // 2) LLM 평가 후보
                 var docs = preRanked.map { it.first }.take(30)
-
-                // 3) 프롬프트(강화판) 작성: 사용자 힌트를 명시하고 ‘반드시 제외’ 규칙을 못 박는다
                 var prompt = buildLLMPrompt(userQuery, hints, docs)
 
-                // (안전) 프롬프트가 너무 길면 절반씩 줄이면서 재작성
                 val MAX_PROMPT_CHARS = 120_000
                 while (prompt.length > MAX_PROMPT_CHARS && docs.size > 10) {
                     docs = docs.take(docs.size / 2)
                     prompt = buildLLMPrompt(userQuery, hints, docs)
                 }
 
-                // 4) 백그라운드 LLM 호출
+                // 3) LLM 호출
                 Thread {
                     try {
                         val arr = gemini.generateJsonArrayPrompt(prompt)
                         if (sessionId != currentSessionId) return@Thread
 
-                        // 5) 결과 매핑 (+ 하한선/제외 적용)
                         val results = mutableListOf<Triple<com.google.firebase.firestore.DocumentSnapshot, Double, String>>()
                         for (i in 0 until arr.length()) {
                             val o = arr.getJSONObject(i)
@@ -169,7 +187,7 @@ class ChatbotFragment : Fragment() {
                             val mustExclude = o.optBoolean("must_exclude", false)
                             val score = o.optDouble("score", 0.0)
                             if (mustExclude) continue
-                            if (score < MIN_LLM_SCORE) continue      // ⬅️ 점수 하한선 0.60 적용
+                            if (score < MIN_LLM_SCORE) continue
                             val reason = o.optString("reason", "")
                             results += Triple(docs[id], score, reason)
                         }
@@ -219,7 +237,7 @@ class ChatbotFragment : Fragment() {
             }
     }
 
-    // ------------------- 프롬프트 생성 (강화판 + ‘반드시 제외’ 명시) -------------------
+    // ------------------- 프롬프트 생성 -------------------
 
     private fun buildLLMPrompt(
         userQuery: String,
@@ -228,58 +246,45 @@ class ChatbotFragment : Fragment() {
     ): String {
         val sb = StringBuilder()
 
-        // 🔒 이전 대화/문맥 무시 지시
         sb.appendLine("이전 대화/문맥은 모두 무시하고, 아래 사용자 입력만 기준으로 판단하라.")
         sb.appendLine("다음은 한국의 복지/지원 정책 후보 리스트이다.")
         sb.appendLine("사용자 입력(자유문): \"$userQuery\"")
 
-        // 사용자 힌트 요약 (명시적으로 못 박기)
         val hintLine = buildString {
             hints.age?.let { append("나이:${it}세 ") }
             hints.ageBand?.let { append("연령대:$it ") }
             hints.gender?.let { append("성별:$it ") }
             hints.region?.let { append("지역:$it ") }
             hints.incomeDecile?.let { append("소득분위:${it}분위 ") }
-            hints.incomeTier?.let { append("소득구분:$it ") } // high/mid/low
+            hints.incomeTier?.let { append("소득구분:$it ") }
         }.trim()
         if (hintLine.isNotEmpty()) sb.appendLine("※ 사용자 힌트: $hintLine")
-
         sb.appendLine()
 
-        // 출력 스키마 & 검증 규칙 + 하한선 반환 규칙
         sb.appendLine("출력은 **JSON 배열만** 허용한다. 다른 텍스트를 절대 포함하지 말라.")
         sb.appendLine("스키마: [{\"id\":number, \"score\":number(0.0~1.0), \"must_exclude\":boolean, \"reason\":string}]")
-        sb.appendLine("- id: 아래 [후보 정책]에 표시된 ID와 정확히 일치해야 함 (중복/누락 금지).")
-        sb.appendLine("- must_exclude=true인 항목의 score는 0.00~0.05 범위로 설정.")
-        sb.appendLine("- reason: 20~80자, 핵심 1~2개 근거만. 모호한 표현 금지(예: '적합해 보임').")
-        sb.appendLine("- JSON 유효성: 배열 형태, 각 객체에 id/score/must_exclude/reason 모두 포함, 불필요한 키 금지.")
-        sb.appendLine("반환 규칙: score가 ${"%.2f".format(MIN_LLM_SCORE)} 미만인 항목은 JSON 응답에서 **제외**하라.") // ⬅️ 0.60 명시
+        sb.appendLine("- id는 아래 [후보 정책]의 ID와 일치.")
+        sb.appendLine("- must_exclude=true이면 score는 0.00~0.05.")
+        sb.appendLine("- reason: 20~80자, 근거 1~2개. 모호한 표현 금지.")
+        sb.appendLine("- score < ${"%.2f".format(MIN_LLM_SCORE)} 인 항목은 **응답에서 제외**.")
         sb.appendLine()
-
-        // 평가 지침(하드 규칙 + 루브릭)
         sb.appendLine("평가 지침:")
-        sb.appendLine("1) **자격요건 불일치**는 반드시 must_exclude=true:")
-        sb.appendLine("   - 연령대 불일치(예: 사용자 23세/청년인데 '청소년/아동/노인' 대상).")
-        sb.appendLine("   - 반대 성별 전용 정책.")
-        sb.appendLine("   - 지역 불일치가 명확(예: 특정 시/도 한정인데 사용자 지역이 다른 경우).")
-        sb.appendLine("   - 소득 불일치: 사용자가 상위 소득층(예: 8~10분위)이면 '저소득층/차상위/기초생활' 등 저소득 대상 정책은 must_exclude=true.")
-        sb.appendLine("   - 그 밖에 명시적 신청 자격 미충족.")
-        sb.appendLine("2) 확실하지 않다면 보수적으로 낮은 score를 주고 must_exclude=false로 남긴다.")
-        sb.appendLine("3) 채점 루브릭(예시): 0.90~1.00=매우 적합, 0.60~0.89=부분 일치, 0.30~0.59=약한 관련.")
-        sb.appendLine("4) reason은 **근거가 된 문구/태그를 직접 언급**(예: '대상: 청년, 지역: 서울특별시, 소득: 저소득 제외').")
-        sb.appendLine("5) 어떤 항목도 환각으로 생성하지 말고, 주어진 정보 외 추론은 금지.")
+        sb.appendLine("1) 자격요건 불일치(연령/성별/지역/소득)는 must_exclude=true.")
+        sb.appendLine("2) 확실하지 않으면 낮은 score + must_exclude=false.")
+        sb.appendLine("3) 0.90~1.00=매우 적합, 0.60~0.89=부분 일치.")
+        sb.appendLine("4) reason에는 근거 문구/태그를 직접 인용.")
+        sb.appendLine("5) 주어진 정보 외 추론 금지.")
         sb.appendLine()
 
-        // 후보 나열 (길이 제한 적용)
         sb.appendLine("[후보 정책]")
-        val MAX_TITLE = 80
-        val MAX_DESC  = 300
-        val MAX_META  = 140
+        val maxTitle = 80
+        val maxDesc  = 300
+        val maxMeta  = 140
 
         docs.forEachIndexed { idx, d ->
             val data = d.data ?: emptyMap<String, Any?>()
-            val title = truncate((data["servNm"] as? String).orEmpty(), MAX_TITLE)
-            val desc  = truncate((data["servDgst"] as? String).orEmpty(), MAX_DESC)
+            val title = truncate((data["servNm"] as? String).orEmpty(), maxTitle)
+            val desc  = truncate((data["servDgst"] as? String).orEmpty(), maxDesc)
             val meta  = truncate(
                 listOf(
                     data["lifeNmArray"] as? String ?: "",
@@ -287,7 +292,7 @@ class ChatbotFragment : Fragment() {
                     data["intrsThemaNmArray"] as? String ?: "",
                     data["ctpvNm"] as? String ?: ""
                 ).joinToString(" "),
-                MAX_META
+                maxMeta
             )
             sb.appendLine("ID=$idx")
             sb.appendLine("제목: $title")
@@ -301,7 +306,6 @@ class ChatbotFragment : Fragment() {
 
     // ------------------- 하드 프리필터 -------------------
 
-    /** 연령 하드 컷: 사용자 연령대와 명백히 불일치하면 제외 */
     private fun hardAgePass(doc: com.google.firebase.firestore.DocumentSnapshot, ageBand: String?): Boolean {
         if (ageBand == null) return true
         val life = ((doc.data?.get("lifeNmArray") as? String) ?: "")
@@ -309,15 +313,13 @@ class ChatbotFragment : Fragment() {
         if (life.isEmpty()) return true
 
         return when (ageBand) {
-            "청년" -> !life.any { it.contains("노인") || it.contains("아동") || it.contains("청소년") }
-            "중장년" -> !life.any { it.contains("노인") || it.contains("아동") || it.contains("청소년") }
+            "청년", "중장년" -> !life.any { it.contains("노인") || it.contains("아동") || it.contains("청소년") }
             "노인" -> life.any { it.contains("노인") }
             "청소년" -> life.any { it.contains("아동") || it.contains("청소년") }
             else -> true
         }
     }
 
-    /** 소득 하드 컷: 상위소득(high)이면 저소득 키워드 포함 정책은 컷 */
     private fun hardIncomePass(doc: com.google.firebase.firestore.DocumentSnapshot, tier: String?): Boolean {
         if (tier == null) return true
         val tags = listOf(
@@ -327,31 +329,24 @@ class ChatbotFragment : Fragment() {
             doc.data?.get("servDgst") as? String ?: ""
         ).joinToString(" ")
 
-        val lowIncomeKeywords = listOf(
-            "저소득", "차상위", "기초생활", "중위소득", "생계급여", "의료급여", "긴급복지", "영세"
-        )
-
-        return when (tier) {
-            "high" -> !lowIncomeKeywords.any { kw -> tags.contains(kw) } // 상위 소득 → 저소득 대상 컷
-            else -> true
-        }
+        val lowIncomeKeywords = listOf("저소득", "차상위", "기초생활", "중위소득", "생계급여", "의료급여", "긴급복지", "영세")
+        return if (tier == "high") !lowIncomeKeywords.any { kw -> tags.contains(kw) } else true
     }
 
     // ------------------- 사용자 힌트 파서 -------------------
 
     private data class UserHints(
         val age: Int? = null,
-        val ageBand: String? = null,   // 청소년/청년/중장년/노인
-        val gender: String? = null,    // 남성/여성
+        val ageBand: String? = null,
+        val gender: String? = null,
         val region: String? = null,
-        val incomeDecile: Int? = null, // 1~10
-        val incomeTier: String? = null // high/mid/low
+        val incomeDecile: Int? = null,
+        val incomeTier: String? = null
     )
 
     private fun parseUserHints(q: String): UserHints {
         val t = q.lowercase()
 
-        // 나이
         var age: Int? = Regex("""(\d{1,3})\s*세""").find(t)?.groupValues?.getOrNull(1)?.toIntOrNull()
         if (age == null) {
             Regex("""(\d{2})\s*대""").find(t)?.groupValues?.getOrNull(1)?.toIntOrNull()?.let { decade ->
@@ -380,14 +375,12 @@ class ChatbotFragment : Fragment() {
             else -> "노인"
         }
 
-        // 성별
         val gender = when {
             t.contains("남") || t.contains("남성") || t.contains("남자") -> "남성"
             t.contains("여") || t.contains("여성") || t.contains("여자") -> "여성"
             else -> null
         }
 
-        // 대략적 지역(간단 추출)
         val possibleRegions = listOf("서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주")
         val region = possibleRegions.firstOrNull { t.contains(it) }?.let {
             when (it) {
@@ -412,9 +405,7 @@ class ChatbotFragment : Fragment() {
             }
         }
 
-        // 소득 분위
         val incomeDecile = Regex("""(\d{1,2})\s*분위""").find(t)?.groupValues?.getOrNull(1)?.toIntOrNull()
-        // 소득 구분
         val incomeTier = when {
             incomeDecile != null && incomeDecile >= 8 -> "high"
             incomeDecile != null && incomeDecile <= 3 -> "low"
@@ -428,7 +419,7 @@ class ChatbotFragment : Fragment() {
 
     // ------------------- 프리필터/키워드 유틸 -------------------
 
-    /** 사용자 쿼리에서 간단 토큰 추출 (한글/숫자 위주) */
+    /** 사용자 쿼리에서 간단 토큰 추출 */
     private fun extractQueryTokens(q: String): List<String> {
         val cleaned = q.lowercase()
         val raw = cleaned.split(Regex("""[\s,./\-()\[\]{}:"'!?]+"""))
@@ -452,29 +443,8 @@ class ChatbotFragment : Fragment() {
     /** 토큰 기반 간단 점수 — 프리필터 가중치 */
     private fun keywordScore(textLower: String, tokens: List<String>): Int {
         var s = 0
-        for (t in tokens) {
-            if (t.isBlank()) continue
-            if (textLower.contains(t)) s += 1
-        }
+        for (t in tokens) if (t.isNotBlank() && textLower.contains(t)) s += 1
         return s
-    }
-
-    /** 쿼리에서 연령대 힌트(청소년/청년/중장년/노인) 추정 — 프롬프트 메모용 */
-    private fun detectAgeBandFromQuery(q: String): String? {
-        val t = q.lowercase()
-        Regex("""(\d{1,3})\s*세""").find(t)?.groupValues?.getOrNull(1)?.toIntOrNull()?.let { age ->
-            return when (age) { in 0..19 -> "청소년"; in 20..39 -> "청년"; in 40..64 -> "중장년"; else -> "노인" }
-        }
-        Regex("""(\d{2})\s*대""").find(t)?.groupValues?.getOrNull(1)?.toIntOrNull()?.let { d ->
-            return when (d) { in 0..19 -> "청소년"; in 20..39 -> "청년"; in 40..64 -> "중장년"; else -> "노인" }
-        }
-        return when {
-            t.contains("아동") || t.contains("청소년") -> "청소년"
-            t.contains("청년") -> "청년"
-            t.contains("중장년") -> "중장년"
-            t.contains("노인") || t.contains("어르신") -> "노인"
-            else -> null
-        }
     }
 
     private fun truncate(s: String, max: Int): String =

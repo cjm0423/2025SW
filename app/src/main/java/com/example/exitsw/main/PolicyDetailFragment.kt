@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyDetailBinding
-import com.example.exitsw.repository.FirebaseRepository
 import com.example.exitsw.util.PolicyIconMapper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -37,8 +36,6 @@ class PolicyDetailFragment : Fragment() {
     private val db by lazy { FirebaseFirestore.getInstance() }
     private val auth by lazy { FirebaseAuth.getInstance() }
 
-    private val repo = FirebaseRepository()
-
     private var itemRef: DocumentReference? = null
     private var likeRef: DocumentReference? = null
     private var countListener: ListenerRegistration? = null
@@ -57,7 +54,8 @@ class PolicyDetailFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPolicyDetailBinding.inflate(inflater, container, false)
@@ -70,16 +68,13 @@ class PolicyDetailFragment : Fragment() {
         val uid = auth.currentUser?.uid
             ?: throw IllegalStateException("로그인 필요")
 
-        // DTO가 정상 전달되었는지 확인
         val p = policy
         if (p == null) {
-            // 안전장치: id만 넘어오는 케이스 대비 폴백을 넣고 싶다면 여기서 구현(B안)
-            // 지금은 A안이므로 간단히 리턴/토스트 정도
             Toast.makeText(requireContext(), "정책 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 전달된 DTO로 바로 UI 바인딩
+        // UI 바인딩
         val iconResId = PolicyIconMapper.getIconResourceId(p)
         binding.imgPolicy.setImageResource(iconResId)
         binding.toolbar.title = p.servNm
@@ -87,7 +82,7 @@ class PolicyDetailFragment : Fragment() {
         binding.textPolicyAgency.text = p.bizChrDeptNm
         binding.textPolicySummary.text = p.servDgst
 
-        // 좋아요 카운트/상태 리스너 설정(네 기존 코드 재사용)
+        // 좋아요 카운트/상태 리스너
         val docId = resolveDocIdSameAsSync(p)
         itemRef = db.collection("policies").document("all")
             .collection("items").document(docId)
@@ -106,25 +101,24 @@ class PolicyDetailFragment : Fragment() {
 
         binding.btnFavorite.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                // user/{uid}/favorites 토글 (repo 버전 또는 프래그먼트 내 구현 중 택1)
-                com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                // user/{uid}/favorites 토글
+                FirebaseFirestore.getInstance()
                     .collection("user").document(uid)
                     .collection("favorites").document(p.servId ?: return@launch)
                     .get().await()
                     .let { doc ->
                         if (doc.exists()) {
                             doc.reference.delete().await()
-                            itemRef?.update("favoritesCount",
-                                com.google.firebase.firestore.FieldValue.increment(-1))
+                            itemRef?.update("favoritesCount", FieldValue.increment(-1))
                         } else {
                             doc.reference.set(p).await()
-                            itemRef?.update("favoritesCount",
-                                com.google.firebase.firestore.FieldValue.increment(1))
+                            itemRef?.update("favoritesCount", FieldValue.increment(1))
                         }
                     }
             }
         }
 
+        // 웹으로 이동 (챗봇 임시 DTO 분기 제거됨)
         binding.btnGoToSite.setOnClickListener {
             p.servDtlLink?.takeIf { it.isNotBlank() }?.let { url ->
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))

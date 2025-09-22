@@ -18,7 +18,6 @@ class PolicyListFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var policyAdapter: PolicyAdapter
 
-    // 인자
     private var selectedRegion: String? = null
     private var filterLink: String? = null
     private var filterTitle: String? = null
@@ -56,7 +55,6 @@ class PolicyListFragment : Fragment() {
             val list = if (!selectedRegion.isNullOrBlank()) {
                 grouped[selectedRegion].orEmpty()
             } else {
-                // 지역 미지정 시 전체 합치기(중복 제거)
                 grouped.values
                     .flatten()
                     .distinctBy { it.servId ?: ((it.servNm ?: "") + (it.servDtlLink ?: "")) }
@@ -77,9 +75,7 @@ class PolicyListFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        // 문자열 리소스 없이 하드코드로 안전 처리 (원하면 strings.xml에 추가해서 교체)
-        val titleText = selectedRegion ?: "전체 지역"
-        binding.toolbar.title = titleText
+        binding.toolbar.title = selectedRegion ?: "전체 지역"
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
@@ -130,9 +126,13 @@ class PolicyListFragment : Fragment() {
     }
 
     private fun openDetail(item: LocalWelfareServiceDto) {
+        val detail = PolicyDetailFragment.newInstance(item)
+        // ✅ replace → add + hide(this): 리스트 스크롤 상태 유지
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, PolicyDetailFragment.newInstance(item))
-            .addToBackStack(null)
+            .setReorderingAllowed(true)
+            .add(R.id.fragment_container, detail, "PolicyDetail")
+            .hide(this)
+            .addToBackStack("PolicyDetail")
             .commit()
     }
 
