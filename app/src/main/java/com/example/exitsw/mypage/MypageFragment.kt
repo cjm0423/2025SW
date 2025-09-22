@@ -1,20 +1,22 @@
 package com.example.exitsw.mypage
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.EditProfileActivity
-import com.example.exitsw.LoginActivity
 import com.example.exitsw.R
-import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentMypageBinding
 import com.example.exitsw.main.PolicyDetailFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -31,18 +33,12 @@ class MypageFragment : Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val updated = result.data?.getBooleanExtra("updated", false) ?: false
-            if (updated) {
-                Toast.makeText(requireContext(), "프로필이 갱신되었어요.", Toast.LENGTH_SHORT).show()
-                // 프로필 변경 시 관심목록 자동 리프레시가 필요하면 아래 한 줄 유지
-                viewModel.startObserveFavorites()
-            }
+            viewModel.startObserveUser()
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMypageBinding.inflate(inflater, container, false)
@@ -52,64 +48,66 @@ class MypageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = FavoriteAdapter { item ->
-            val dto = LocalWelfareServiceDto(
-                servId       = item.id,
-                servNm       = item.title,
-                bizChrDeptNm = item.department,
-                servDgst     = item.summary,
-                ctpvNm       = item.region,
-                sggNm        = item.city,
-                servDtlLink  = item.detailLink
-            )
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, PolicyDetailFragment.newInstance(dto))
-                .addToBackStack(null)
-                .commit()
-        }
-
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = adapter
-
-        // 마이페이지가 열리면 즉시 관찰 시작 (버튼 필요 없음)
-        Log.d("MypageFragment", "auto observeFavorites() onViewCreated")
-        viewModel.startObserveFavorites()
-
-        // LiveData 결과 반영
+        // LiveData 구독
         viewModel.favoriteList.observe(viewLifecycleOwner) { list ->
             adapter.submitList(
                 list.map { dto ->
-                    FavoritePolicy(
-                        id         = dto.servId.orEmpty(),
-                        title      = dto.servNm.orEmpty(),
-                        department = dto.bizChrDeptNm,
-                        summary    = dto.servDgst,
-                        region     = dto.ctpvNm,
-                        city       = dto.sggNm,
-                        detailLink = dto.servDtlLink
-                    )
+                    FavoritePolicy(servId = dto.servId ?: "", servNm = dto.servNm ?: "")
                 }
             )
         }
-
-        // 프로필 수정
-        binding.btnEditProfile.setOnClickListener {
-            editProfileLauncher.launch(
-                android.content.Intent(requireContext(), EditProfileActivity::class.java)
-            )
+        viewModel.userProfile.observe(viewLifecycleOwner) { profile ->
+            if (profile != null) {
+                binding.tvNickname.text = profile.nickname
+                binding.tvDistrict.text = profile.district ?: "· 지역구 정보 없음"
+            } else {
+                binding.tvNickname.text = "로그인이 필요합니다"
+                binding.tvDistrict.text = ""
+            }
         }
+
+        // 프로필 카드 → 편집
+        binding.cardProfile.setOnClickListener {
+            val intent = Intent(requireContext(), EditProfileActivity::class.java)
+            editProfileLauncher.launch(intent)
+        }
+
+        // 관심 목록 RecyclerView
+        adapter = FavoriteAdapter { policy ->
+            openPolicyDetail(policy.servId, policy.servNm)
+        }
+        binding.rvFavorites.apply {
+            layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+            setHasFixedSize(false)
+            isNestedScrollingEnabled = false
+            adapter = this@MypageFragment.adapter
+        }
+
+        val divider = DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
+        divider.setDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.divider_gray)!!)
+        binding.rvFavorites.addItemDecoration(divider)
 
         // 로그아웃
         binding.btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-            startActivity(
-                android.content.Intent(requireContext(), LoginActivity::class.java).apply {
-                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
-                            android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-            )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.startObserveUser()
+        viewModel.startObserveFavorites()
+    }
+
+    private fun openPolicyDetail(servId: String, servNm: String) {
+        val fragment = PolicyDetailFragment().apply {
+            arguments = bundleOf("servId" to servId, "servNm" to servNm)
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment) // 실제 컨테이너 id 확인 필요
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {

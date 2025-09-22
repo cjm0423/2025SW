@@ -7,14 +7,31 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.databinding.ItemMypageFavoriteBinding
 
+// FavoriteAdapter.kt 맨 위의 데이터 클래스 수정
+data class FavoritePolicy(
+    val servId: String = "",
+    val servNm: String = "",
+
+    // 아래는 카드 표시엔 꼭 필요 없으니 기본값을 둬서 선택적으로 받자
+    val btchDeptNm: String = "",
+    val ctpvNm: String = "",
+    val favoritesCount: Int = 0,
+    val inqNum: String = "",
+    val intrsThemaNm: String = "",
+    val servDgst: String = "",
+    val servDtlLink: String = ""
+    // 필요하면 더 추가
+)
+
+
 class FavoriteAdapter(
     private val onItemClick: (FavoritePolicy) -> Unit
 ) : ListAdapter<FavoritePolicy, FavoriteAdapter.VH>(DIFF) {
 
     class VH(private val binding: ItemMypageFavoriteBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: FavoritePolicy, onItemClick: (FavoritePolicy) -> Unit) {
-            binding.textTitle.text = item.title
-            binding.textTitle.setOnClickListener { onItemClick(item) }
+            binding.textTitle.text = item.servNm
+            binding.root.setOnClickListener { onItemClick(item) }
         }
     }
 
@@ -26,18 +43,16 @@ class FavoriteAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        var item = getItem(position)
-        holder.itemView.setOnClickListener{
-            onItemClick(item)
-        }
-
-        holder.bind(getItem(position), onItemClick)
+        val item = getItem(position)
+        holder.bind(item, onItemClick)
     }
 
     companion object {
-        private val DIFF = object : DiffUtil.ItemCallback<FavoritePolicy>() {
-            override fun areItemsTheSame(o: FavoritePolicy, n: FavoritePolicy) = o.id == n.id
-            override fun areContentsTheSame(o: FavoritePolicy, n: FavoritePolicy) = o == n
+        val DIFF = object : DiffUtil.ItemCallback<FavoritePolicy>() {
+            override fun areItemsTheSame(oldItem: FavoritePolicy, newItem: FavoritePolicy) =
+                oldItem.servId == newItem.servId
+            override fun areContentsTheSame(oldItem: FavoritePolicy, newItem: FavoritePolicy) =
+                oldItem == newItem
         }
     }
 }
