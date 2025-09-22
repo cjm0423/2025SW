@@ -1,31 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment_savinglist"
-    android:layout_margin="8dp">
+    android:layout_margin="8dp"
+    tools:context=".saving.fragment_savingDetail">
 
+    <!-- 상단 바 -->
     <LinearLayout
         android:id="@+id/topBarLay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageButton
-            android:id="@+id/imbtnBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:padding="8dp"
-            android:src="@drawable/ic_arrow_back" />
-
-        <!-- 버튼으로 만들어서 누르면 홈으로 가게 -->
         <TextView
             android:id="@+id/textAppName"
             android:layout_width="wrap_content"
@@ -36,45 +29,28 @@
             android:textColor="@color/black"
             android:textSize="17sp" />
 
-        <!-- 여백을 만들어 오른쪽으로 보내기 위한 View -->
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-
-        <ImageButton
-            android:id="@+id/imbtnScrap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:padding="5dp"
-            android:src="@drawable/ic_scrap" />
-
-        <ImageButton
-            android:id="@+id/imbtnShare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:padding="5dp"
-            android:src="@drawable/ic_share" />
     </LinearLayout>
 
+    <!-- 본문 상단(썸네일 + 기본 정보) -->
     <LinearLayout
         android:id="@+id/savingbodyLay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/topBarLay"
         android:orientation="vertical"
-        >
+        app:layout_constraintTop_toBottomOf="@id/topBarLay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="5dp"
-            app:layout_constraintTop_toBottomOf="@id/topBarLayout">
+            android:padding="5dp">
 
-            <!-- 상품 이미지 -->
             <ImageView
                 android:id="@+id/imgSavings"
                 android:layout_width="wrap_content"
@@ -83,7 +59,6 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_defaultimg" />
 
-            <!-- 상품 정보 영역 -->
             <LinearLayout
                 android:id="@+id/savingInfoLay"
                 android:layout_width="0dp"
@@ -94,7 +69,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textSavingName"
+                    android:id="@+id/text_saving_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/textSavingname"
@@ -103,82 +78,66 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/textBankName"
+                    android:id="@+id/text_bank_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/textBankname"
                     android:textColor="@color/black"
                     android:textSize="10sp" />
 
-                <Button
-                    android:id="@+id/btnSave"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:paddingTop="6dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="6dp"
-                    android:text="신청하기" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnSave"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:text="신청하기" />
+
+                    <Button
+                        android:id="@+id/btn_calculate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:text="계산하기" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
-    <TextView
-        android:id="@+id/textPublishedDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="등록된 날짜"
-        android:textSize="10sp"
-        android:layout_marginLeft="20dp"
-        android:textColor="@color/black"/>
-
         <TextView
-            android:id="@+id/textSavingInfo"
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:id="@+id/text_note"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="이 글은 상품 설명란 입니다."
-            android:textSize="13sp"
-            android:textColor="@color/black"/>
+            android:text="(기타 설명)"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
     </LinearLayout>
 
+    <!-- 연관 상품 영역 -->
     <LinearLayout
+        android:id="@+id/relatedContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/savingbodyLay"
         app:layout_constraintEnd_toEndOf="parent"
-        android:orientation="vertical">
+        app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp">
-        <TextView
-            android:id="@+id/textRelatedSaving"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="6dp"
-            android:text="연관된 상품"
-            android:textColor="@color/black"
-            android:textSize="17sp" />
-        <ImageButton
-            android:id="@+id/imbtnGO"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:padding="8dp"
-            android:src="@drawable/ic_arrowgo" />
-        </LinearLayout>
 
-        <!-- 🔽 여기에 연관된 상품 항목(item_saving_product)이 동적으로 추가됨 -->
         <LinearLayout
             android:id="@+id/relatedSavingLay"
             android:layout_width="match_parent"
@@ -187,8 +146,8 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:paddingBottom="16dp">
-
-            <!-- Java/Kotlin 코드로 item_saving_product.xml이 반복 추가됨 -->
+            <!-- item_saving_product.xml 이 동적으로 addView 됩니다 -->
         </LinearLayout>
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
