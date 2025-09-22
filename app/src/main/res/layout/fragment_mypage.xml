@@ -6,173 +6,132 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mypage_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- 배너 -->
+        <ImageView
+            android:id="@+id/bannerImage"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/banner"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintDimensionRatio="H,16:9" />
+
+        <!-- 상단 우측 버튼 묶음 -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/topButtons"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintTop_toTopOf="@id/bannerImage"
+            app:layout_constraintEnd_toEndOf="@id/bannerImage">
 
-            <!-- 상단 배너/프로필 영역 -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/bannerImage"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/banner"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintDimensionRatio="H,16:9"/>
-
-                <ImageButton
-                    android:id="@+id/btn_back"
-                    style="@style/NoBackground_ImageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_arrow_back"
-                    app:layout_constraintTop_toTopOf="@id/bannerImage"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="10dp"/>
-
-                <TextView
-                    android:id="@+id/UserNameText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="최민식"
-                    android:textColor="#FFFFFF"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@+id/UserLocalText"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <TextView
-                    android:id="@+id/UserLocalText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="사용자 지역구"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    app:layout_constraintTop_toBottomOf="@id/UserNameText"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <LinearLayout
-                    android:id="@+id/mypageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginStart="10dp"
-                    app:layout_constraintTop_toBottomOf="@id/UserLocalText"
-                    app:layout_constraintBottom_toBottomOf="parent">
-
-                    <Button
-                        android:id="@+id/btn_edit_profile"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/your_theme_color"
-                        android:padding="8dp"
-                        android:text="프로필 수정"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btn_logout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/your_theme_color"
-                        android:padding="8dp"
-                        android:text="로그아웃"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <!-- 본문: 요약 + 탭 + 리스트 -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!--프로필 수정 버튼-->
+            <Button
+                android:id="@+id/btn_edit_profile"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp">
+                android:backgroundTint="@color/your_theme_color"
+                android:padding="8dp"
+                android:text="프로필 수정"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
 
-                <!-- 진행 중인 상품 요약 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="진행 중인 상품"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="상품 이름 | 은행이름 | ₩0,000 (0.0%) +"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="상품 이름 | 은행이름 | ₩0,000 (0.0%) +"
-                        android:layout_gravity="center" />
-                </LinearLayout>
-
-                <!-- 탭 + 관심 리스트 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/btn_ongoing"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="진행 중인" />
-
-                        <Button
-                            android:id="@+id/btn_favorite"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="관심" />
-                    </LinearLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"
-                        tools:listitem="@layout/item_mypage_favorite" />
-
-                    <Button
-                        android:id="@+id/btn_more"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="더 보기"
-                        android:background="@drawable/rounded_button"
-                        android:layout_margin="16dp" />
-                </LinearLayout>
-            </LinearLayout>
+            <!
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@color/your_theme_color"
+                android:padding="8dp"
+                android:text="로그아웃"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
         </LinearLayout>
-    </ScrollView>
+
+        <!-- 사용자 이름/지역 (배너 위 오버레이) -->
+        <TextView
+            android:id="@+id/UserNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="최민식"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/bannerImage"
+            app:layout_constraintBottom_toTopOf="@id/UserLocalText" />
+
+        <TextView
+            android:id="@+id/UserLocalText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="사용자 지역구"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@id/bannerImage"
+            app:layout_constraintBottom_toBottomOf="@id/bannerImage" />
+
+        <!-- 배너 하단: 마이페이지 버튼 라인 (필요 시 내용 추가) -->
+        <LinearLayout
+            android:id="@+id/mypageButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/bannerImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- 필요 버튼들 추가 -->
+        </LinearLayout>
+
+        <!-- 탭/버튼 라인 -->
+        <LinearLayout
+            android:id="@+id/tabBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/mypageButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <Button
+                android:id="@+id/btn_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="관심" />
+        </LinearLayout>
+
+        <!-- 리스트: 상단 바 아래에서부터 화면 하단까지 확장 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            tools:listitem="@layout/item_mypage_favorite"
+            app:layout_constraintTop_toBottomOf="@id/tabBar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
