@@ -4,7 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="5dp"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:baselineAligned="false"
+    android:gravity="top">
 
     <!-- 상품 이미지 -->
     <ImageView
@@ -13,7 +15,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_defaultimg"
         android:scaleType="centerCrop"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="top" />
 
     <!-- 상품 정보 영역 -->
     <LinearLayout
@@ -22,17 +24,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginStart="10dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1">
+        android:layout_gravity="top"
+        android:layout_weight="1"
+        android:paddingTop="10dp">   <!-- 👈 살짝 내려주는 패딩 -->
 
         <TextView
             android:id="@+id/textSavingName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/textSavingname"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/textBankName"
