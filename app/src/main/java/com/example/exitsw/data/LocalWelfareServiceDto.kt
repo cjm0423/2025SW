@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
 @Parcelize
-data class LocalWelfareServiceDto(
+data class  LocalWelfareServiceDto(
     @get:PropertyName("aplyMtdNm") @set:PropertyName("aplyMtdNm")
     var aplyMtdNm: String? = null,
 

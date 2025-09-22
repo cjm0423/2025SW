@@ -103,7 +103,7 @@ class PolicyDetailFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
-    }
+    }   
 
     private fun toggleFavorite() {
         val itemRef = requireNotNull(itemRef)
