@@ -13,4 +13,12 @@ interface WelfareApiService {
         @Query("numOfRows") numOfRows: Int = 10
     ): LocalWelfareListResponse
 
+    // (신규) 광역명 기반
+    @GET("/api/welfare/local/services")
+    suspend fun getProvinceWelfareList(
+        @Query("ctpvNm") ctpvNm: String,            // 예: "경상북도", "서울특별시"
+        @Query("pageNo") pageNo: Int = 1,
+        @Query("numOfRows") numOfRows: Int = 200    // 넉넉히 받아서 점수화
+    ): LocalWelfareListResponse
+
 }

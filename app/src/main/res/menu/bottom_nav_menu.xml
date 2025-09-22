@@ -11,16 +11,11 @@
 
     <item
         android:id="@+id/menu_ai"
-        android:icon="@drawable/ic_ai"
+        android:icon="@drawable/ic_chatbot"
         android:title="AI" />
 
     <item
-        android:id="@+id/menu_saving"
-        android:icon="@drawable/ic_savings"
-        android:title="상품" />
-
-    <item
-        android:id="@+id/menu_policy"
-        android:icon="@drawable/ic_policy"
-        android:title="정책" />
+        android:id="@+id/menu_mypage"
+        android:icon="@drawable/ic_ai"
+        android:title="마이페이지" />
 </menu>

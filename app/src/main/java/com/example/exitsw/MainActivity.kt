@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.menu_home -> {
                     replaceFragment(MainFragment()); true
                 }
-                R.id.menu_policy -> {
+                R.id.menu_mypage -> {
                     replaceFragment(MypageFragment()); true
                 }
                 R.id.menu_ai -> {

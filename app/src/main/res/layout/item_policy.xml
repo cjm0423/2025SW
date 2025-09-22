@@ -21,7 +21,6 @@
             android:id="@+id/imgPolicy"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:background="#E0E0E0"
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -32,36 +31,43 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            tools:text="서울 자립마련 정책"
             android:textColor="@android:color/black"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@id/imgPolicy"
             app:layout_constraintTop_toTopOf="@id/imgPolicy"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="서울 자립마련 정책" />
 
         <TextView
             android:id="@+id/textPolicyAgency"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            tools:text="은행 이름"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12sp"
+            android:textColor="#555555"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintStart_toStartOf="@id/textPolicyName"
             app:layout_constraintTop_toBottomOf="@id/textPolicyName"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="은행 이름"/>
 
         <TextView
             android:id="@+id/textPolicySummary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="한 줄 설명"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            android:textColor="#555555"
+            android:textSize="13sp"
+            android:maxLines="2"
+            android:ellipsize="end"
             app:layout_constraintStart_toStartOf="@id/textPolicyName"
             app:layout_constraintTop_toBottomOf="@id/textPolicyAgency"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="한 줄 설명이 여기에 표시됩니다. 줄이 길어지면 두 줄까지 보이고 그 뒤는 생략됩니다."/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

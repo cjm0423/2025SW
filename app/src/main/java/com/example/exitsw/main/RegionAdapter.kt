@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exitsw.data.RegionInfo
 import com.example.exitsw.databinding.ItemRegionBinding
+import com.example.exitsw.util.RegionIconMapper
 
 class RegionAdapter(private val onItemClicked: (RegionInfo) -> Unit) : ListAdapter<RegionInfo, RegionAdapter.RegionViewHolder>(DiffCallback) {
 
@@ -19,17 +20,19 @@ class RegionAdapter(private val onItemClicked: (RegionInfo) -> Unit) : ListAdapt
         fun bind(regionInfo: RegionInfo) {
             binding.textRegionName.text = regionInfo.name
 
-            // ✨ [핵심 수정] policyCount의 상태에 따라 다른 텍스트를 표시
+            val iconResId = RegionIconMapper.getIconResourceId(regionInfo.name)
+            binding.imgRegion.setImageResource(iconResId)
+
             when (val count = regionInfo.policyCount) {
-                null -> { // null이면 로딩 중
+                null -> {
                     binding.textPolicyCount.text = "개수 확인 중..."
                     binding.textPolicyCount.setTextColor(itemView.context.getColor(android.R.color.darker_gray))
                 }
-                -1 -> { // -1이면 연결 실패
+                -1 -> {
                     binding.textPolicyCount.text = "연결 실패"
                     binding.textPolicyCount.setTextColor(itemView.context.getColor(android.R.color.holo_red_dark))
                 }
-                else -> { // 0 이상이면 실제 개수
+                else -> {
                     binding.textPolicyCount.text = "${count}개 정책"
                     binding.textPolicyCount.setTextColor(itemView.context.getColor(android.R.color.holo_blue_dark))
                 }

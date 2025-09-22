@@ -7,10 +7,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentPolicyDetailBinding
+import com.example.exitsw.util.PolicyIconMapper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -18,6 +21,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
 import java.util.Locale
 
@@ -49,7 +54,8 @@ class PolicyDetailFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPolicyDetailBinding.inflate(inflater, container, false)
@@ -60,43 +66,62 @@ class PolicyDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val uid = auth.currentUser?.uid
-            ?: throw IllegalStateException("User must be logged in before entering PolicyDetailFragment")
+            ?: throw IllegalStateException("로그인 필요")
 
-        policy?.let { p ->
-            // [수정] UI 바인딩 시 변경된 변수 이름을 사용합니다.
-            binding.toolbar.title = p.servNm
-            binding.textPolicyName.text = p.servNm
-            binding.textPolicyAgency.text = p.bizChrDeptNm
-            binding.textPolicySummary.text = p.servDgst
+        val p = policy
+        if (p == null) {
+            Toast.makeText(requireContext(), "정책 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-            val docId = resolveDocIdSameAsSync(p)
-            require(docId.isNotBlank()) { "policy docId is blank" }
+        // UI 바인딩
+        val iconResId = PolicyIconMapper.getIconResourceId(p)
+        binding.imgPolicy.setImageResource(iconResId)
+        binding.toolbar.title = p.servNm
+        binding.textPolicyName.text = p.servNm
+        binding.textPolicyAgency.text = p.bizChrDeptNm
+        binding.textPolicySummary.text = p.servDgst
 
-            itemRef = db.collection("policies").document("all")
-                .collection("items").document(docId)
-            likeRef = itemRef!!.collection("likes").document(uid)
+        // 좋아요 카운트/상태 리스너
+        val docId = resolveDocIdSameAsSync(p)
+        itemRef = db.collection("policies").document("all")
+            .collection("items").document(docId)
+        likeRef = itemRef!!.collection("likes").document(uid)
 
-            countListener = itemRef!!.addSnapshotListener { snap, _ ->
-                val count = snap?.getLong("favoritesCount") ?: 0L
-                binding.textFavoriteNum.text = count.toString()
-            }
+        countListener = itemRef!!.addSnapshotListener { snap, _ ->
+            val count = snap?.getLong("favoritesCount") ?: 0L
+            binding.textFavoriteNum.text = count.toString()
+        }
+        likeListener = likeRef!!.addSnapshotListener { snap, _ ->
+            val liked = snap?.exists() == true
+            binding.btnFavorite.setImageResource(
+                if (liked) R.drawable.ic_favorite_check else R.drawable.ic_favorite_plus
+            )
+        }
 
-            likeListener = likeRef!!.addSnapshotListener { snap, _ ->
-                val liked = snap?.exists() == true
-                binding.btnFavorite.setImageResource(
-                    if (liked) R.drawable.ic_favorite_check else R.drawable.ic_favorite_plus
-                )
-            }
-
-            binding.btnFavorite.setOnClickListener { toggleFavorite() }
-
-            // [수정] "신청하러 가기" 버튼에서 변경된 변수 이름을 사용합니다.
-            binding.btnGoToSite.setOnClickListener {
-                p.servDtlLink?.let { url ->
-                    if (url.isNotBlank()) {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        binding.btnFavorite.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                // user/{uid}/favorites 토글
+                FirebaseFirestore.getInstance()
+                    .collection("user").document(uid)
+                    .collection("favorites").document(p.servId ?: return@launch)
+                    .get().await()
+                    .let { doc ->
+                        if (doc.exists()) {
+                            doc.reference.delete().await()
+                            itemRef?.update("favoritesCount", FieldValue.increment(-1))
+                        } else {
+                            doc.reference.set(p).await()
+                            itemRef?.update("favoritesCount", FieldValue.increment(1))
+                        }
                     }
-                }
+            }
+        }
+
+        // 웹으로 이동 (챗봇 임시 DTO 분기 제거됨)
+        binding.btnGoToSite.setOnClickListener {
+            p.servDtlLink?.takeIf { it.isNotBlank() }?.let { url ->
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
             }
         }
 
@@ -105,28 +130,29 @@ class PolicyDetailFragment : Fragment() {
         }
     }   
 
-    private fun toggleFavorite() {
-        val itemRef = requireNotNull(itemRef)
-        val likeRef = requireNotNull(likeRef)
-
-        db.runTransaction { tx ->
-            val likeSnap = tx.get(likeRef)
-            val liked = likeSnap.exists()
-            if (liked) {
-                tx.delete(likeRef)
-                tx.update(itemRef, "favoritesCount", FieldValue.increment(-1))
-            } else {
-                tx.set(likeRef, mapOf("createdAt" to FieldValue.serverTimestamp()))
-                tx.update(itemRef, "favoritesCount", FieldValue.increment(1))
-            }
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         countListener?.remove()
         likeListener?.remove()
         _binding = null
+    }
+
+    /**
+     * user/{uid}/favorites 서브컬렉션에 정책 추가/삭제
+     * 동시에 policies/all/items/{docId}.favoritesCount 카운트 업데이트
+     */
+    private suspend fun toggleFavorite(uid: String, dto: LocalWelfareServiceDto) {
+        val favRef = db.collection("user").document(uid)
+            .collection("favorites").document(dto.servId ?: return)
+
+        val snap = favRef.get().await()
+        if (snap.exists()) {
+            favRef.delete().await()
+            itemRef?.update("favoritesCount", FieldValue.increment(-1))
+        } else {
+            favRef.set(dto).await()
+            itemRef?.update("favoritesCount", FieldValue.increment(1))
+        }
     }
 
     companion object {
@@ -143,7 +169,6 @@ class PolicyDetailFragment : Fragment() {
             val type = object : TypeToken<Map<String, Any?>>() {}.type
             val map: Map<String, Any?> = gson.fromJson(json, type)
 
-            // [수정] DTO의 변경된 변수 이름(servId)을 최우선으로 사용하도록 변경
             val candidate = listOf("servId", "svcId", "id", "service_id", "no")
                 .firstNotNullOfOrNull { k -> map[k]?.toString()?.takeIf { it.isNotBlank() } }
 

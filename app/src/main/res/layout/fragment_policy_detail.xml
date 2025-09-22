@@ -8,12 +8,21 @@
     android:orientation="vertical"
     android:background="@android:color/white">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        tools:title="정책 이름" />
+        android:layout_height="wrap_content"
+        android:background="@android:color/white">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@android:color/black"
+            app:titleTextColor="@android:color/black"
+            tools:title="정책 이름" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -30,7 +39,9 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_gravity="center_horizontal"
-                android:background="#E0E0E0" />
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/ic_ai" />
 
             <TextView
                 android:id="@+id/textPolicyName"
@@ -38,10 +49,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                tools:text="서울 자립마련 정책"
                 android:textColor="@android:color/black"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="서울 자립마련 정책" />
 
             <TextView
                 android:id="@+id/textPolicyAgency"
@@ -49,27 +60,28 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
-                tools:text="서울시"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="14sp" />
+                android:textSize="16sp"
+                tools:text="서울시" />
 
-
-
-            <!-- 하트 + 숫자 : 가로 배치 -->
             <LinearLayout
                 android:id="@+id/layoutFavoriteRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/btn_favorite"
-                    android:src="@drawable/ic_favorite_plus"
                     style="@style/NoBackground_ImageButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:contentDescription="관심 정책 추가 또는 삭제"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/ic_favorite_plus" />
 
                 <TextView
                     android:id="@+id/textFavoriteNum"
@@ -77,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:textColor="@android:color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     tools:text="0" />
             </LinearLayout>
 
@@ -87,16 +99,22 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
-                android:text="신청하러 가기" />
+                android:paddingStart="24dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="12dp"
+                android:text="신청하러 가기"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textPolicySummary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                tools:text="정책에 대한 상세 설명이 여기에 표시됩니다. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
                 android:textColor="@android:color/black"
-                android:textSize="16sp" />
+                android:textSize="18sp"
+                android:lineSpacingExtra="4sp"
+                tools:text="정책에 대한 상세 설명이 여기에 표시됩니다. Lorem ipsum dolor sit amet, consectetur adipiscing elit." />
 
         </LinearLayout>
     </ScrollView>

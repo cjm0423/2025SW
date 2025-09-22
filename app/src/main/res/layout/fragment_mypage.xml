@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -14,11 +15,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- 상단 배너/프로필 영역 -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <!-- 이미지 (배너) -->
                 <ImageView
                     android:id="@+id/bannerImage"
                     android:layout_width="0dp"
@@ -30,19 +31,16 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintDimensionRatio="H,16:9"/>
 
-                <!-- 좌측 이전 버튼 -->
                 <ImageButton
                     android:id="@+id/btn_back"
                     style="@style/NoBackground_ImageButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_arrow_back"
-                    app:layout_constraintTop_toTopOf="@+id/bannerImage"
+                    app:layout_constraintTop_toTopOf="@id/bannerImage"
                     app:layout_constraintStart_toStartOf="parent"
                     android:layout_marginTop="10dp"
                     android:layout_marginStart="10dp"/>
-
-                <!-- 사용자 이름 텍스트 -->
 
                 <TextView
                     android:id="@+id/UserNameText"
@@ -65,31 +63,17 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     app:layout_constraintTop_toBottomOf="@id/UserNameText"
-                    app:layout_constraintStart_toStartOf="parent"
-                    />
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <LinearLayout
                     android:id="@+id/mypageButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="10dp"
                     app:layout_constraintTop_toBottomOf="@id/UserLocalText"
-                    tools:layout_editor_absoluteX="0dp"
-                    android:layout_marginStart="10dp">
+                    app:layout_constraintBottom_toBottomOf="parent">
 
-                    <!-- 캘린더 버튼 -->
-                    <Button
-                        android:id="@+id/btn_calendar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/your_theme_color"
-                        android:padding="8dp"
-                        android:text="캘린더"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp" />
-
-                    <!-- 프로필 수정 버튼 -->
                     <Button
                         android:id="@+id/btn_edit_profile"
                         android:layout_width="wrap_content"
@@ -109,19 +93,19 @@
                         android:text="로그아웃"
                         android:textColor="@android:color/black"
                         android:textSize="14sp" />
-
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <!-- 본문: 요약 + 탭 + 리스트 -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp">
 
-                <!-- 🔶 1. 상단 진행 중인 상품 요약 영역 -->
+                <!-- 진행 중인 상품 요약 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -135,25 +119,24 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:text="상품 이름 | 은행이름 | ₩0,000 (0.0%) +"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"/>
+                        android:text="상품 이름 | 은행이름 | ₩0,000 (0.0%) +"
+                        android:layout_gravity="center" />
+
                     <TextView
-                        android:text="상품 이름 | 은행이름 | ₩0,000 (0.0%) +"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"/>
+                        android:text="상품 이름 | 은행이름 | ₩0,000 (0.0%) +"
+                        android:layout_gravity="center" />
                 </LinearLayout>
 
-                <!-- 탭 + 상품 리스트 영역 -->
+                <!-- 탭 + 관심 리스트 -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- 탭 전환 영역 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -174,14 +157,13 @@
                             android:text="관심" />
                     </LinearLayout>
 
-                    <!-- RecyclerView 영역 -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerView"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_mypage_favorite" />
 
-                    <!-- 더보기 버튼 -->
                     <Button
                         android:id="@+id/btn_more"
                         android:layout_width="match_parent"
@@ -191,10 +173,6 @@
                         android:layout_margin="16dp" />
                 </LinearLayout>
             </LinearLayout>
-
-
         </LinearLayout>
-
     </ScrollView>
-
 </androidx.drawerlayout.widget.DrawerLayout>
