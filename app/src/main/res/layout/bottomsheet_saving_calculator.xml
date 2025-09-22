@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- 월 납입액 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilMonthly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="월 납입액(원)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputMonthly"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 가입 기간(개월) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilMonths"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="가입 기간(개월)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputMonths"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 금리 선택 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="금리 선택"
+            android:textStyle="bold"
+            android:paddingTop="12dp"
+            android:paddingBottom="6dp"/>
+
+        <RadioGroup
+            android:id="@+id/radioRateGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RadioButton
+                android:id="@+id/radioBase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="기본금리" />
+
+            <RadioButton
+                android:id="@+id/radioPrefer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="우대금리" />
+
+            <RadioButton
+                android:id="@+id/radioCustom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="직접입력" />
+        </RadioGroup>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCustomRate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="직접입력 금리(연, %)"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputCustomRate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 납입 시점 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="납입 시점"
+            android:textStyle="bold"
+            android:paddingTop="12dp"
+            android:paddingBottom="6dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerTiming"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 세금 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="이자 과세"
+            android:textStyle="bold"
+            android:paddingTop="12dp"
+            android:paddingBottom="6dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerTax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCustomTax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="사용자 세율(%)"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputCustomTax"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 버튼 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCalc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="계산하기"
+            android:layout_marginTop="16dp"/>
+
+        <!-- 결과 -->
+        <TextView
+            android:id="@+id/txtResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:paddingTop="12dp"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

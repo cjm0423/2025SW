@@ -1,0 +1,50 @@
+<!-- res/layout/dialog_saving_recommend.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
+
+        <EditText
+            android:id="@+id/edit_monthly_saving"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="월 저축금액" />
+
+        <Spinner
+            android:id="@+id/spinner_age_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/check_auto_transfer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="자동이체" />
+
+        <CheckBox
+            android:id="@+id/check_non_face"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="비대면" />
+
+        <CheckBox
+            android:id="@+id/check_salary_transfer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="급여이체" />
+
+        <CheckBox
+            android:id="@+id/check_youth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="청년" />
+
+        <CheckBox
+            android:id="@+id/check_financial_edu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="금융교육" />
+    </LinearLayout>
+</ScrollView>

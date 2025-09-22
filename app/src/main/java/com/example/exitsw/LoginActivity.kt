@@ -30,14 +30,11 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         val btnKakaoLogin = findViewById<ImageButton>(R.id.btnKakaoLogin)
-        val btnKakaoStart = findViewById<MaterialButton>(R.id.btnKakaoStart)
-
         // ✅ 세션이 있어도 우회하지 말고 항상 OIDC 시작 (계정 선택창 강제)
         val loginListener = {
             startKakaoOidcSignIn(forcePrompt = true, selectAccount = true)
         }
         btnKakaoLogin.setOnClickListener { loginListener.invoke() }
-        btnKakaoStart.setOnClickListener { loginListener.invoke() }
     }
 
     /** Firebase Auth - OIDC(Kakao) 로그인 시작 */

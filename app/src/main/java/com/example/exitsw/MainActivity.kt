@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import com.example.exitsw.databinding.ActivityMainBinding
 import com.example.exitsw.main.MainFragment
 import com.example.exitsw.mypage.MypageFragment
+import com.example.exitsw.saving.fragment_savinglist
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
@@ -52,6 +53,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.menu_ai -> {
                     replaceFragment(ChatbotFragment()); true
+                }
+                R.id.menu_calculator -> {
+                    replaceFragment(fragment_savinglist()); true
                 }
                 else -> false
             }
