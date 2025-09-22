@@ -16,7 +16,7 @@ import com.example.exitsw.LoginActivity
 import com.example.exitsw.R
 import com.example.exitsw.data.LocalWelfareServiceDto
 import com.example.exitsw.databinding.FragmentMypageBinding
-import com.example.exitsw.main.PolicyDetailFragment // 패키지 경로 맞게 조정
+import com.example.exitsw.main.PolicyDetailFragment
 import com.google.firebase.auth.FirebaseAuth
 
 class MypageFragment : Fragment() {
@@ -34,6 +34,8 @@ class MypageFragment : Fragment() {
             val updated = result.data?.getBooleanExtra("updated", false) ?: false
             if (updated) {
                 Toast.makeText(requireContext(), "프로필이 갱신되었어요.", Toast.LENGTH_SHORT).show()
+                // 프로필 변경 시 관심목록 자동 리프레시가 필요하면 아래 한 줄 유지
+                viewModel.startObserveFavorites()
             }
         }
     }
@@ -52,13 +54,13 @@ class MypageFragment : Fragment() {
 
         adapter = FavoriteAdapter { item ->
             val dto = LocalWelfareServiceDto(
-                servId      = item.id,
-                servNm      = item.title,
-                bizChrDeptNm= item.department,
-                servDgst    = item.summary,
-                ctpvNm      = item.region,
-                sggNm       = item.city,
-                servDtlLink = item.detailLink
+                servId       = item.id,
+                servNm       = item.title,
+                bizChrDeptNm = item.department,
+                servDgst     = item.summary,
+                ctpvNm       = item.region,
+                sggNm        = item.city,
+                servDtlLink  = item.detailLink
             )
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, PolicyDetailFragment.newInstance(dto))
@@ -66,15 +68,14 @@ class MypageFragment : Fragment() {
                 .commit()
         }
 
-
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
 
-        binding.btnFavorite.setOnClickListener {
-            Log.d("MypageFragment", "btn_favorite clicked → observeFavorites()")
-            viewModel.startObserveFavorites()
-        }
+        // 마이페이지가 열리면 즉시 관찰 시작 (버튼 필요 없음)
+        Log.d("MypageFragment", "auto observeFavorites() onViewCreated")
+        viewModel.startObserveFavorites()
 
+        // LiveData 결과 반영
         viewModel.favoriteList.observe(viewLifecycleOwner) { list ->
             adapter.submitList(
                 list.map { dto ->
