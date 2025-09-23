@@ -42,7 +42,6 @@ android {
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
         buildConfigField("String", "GEMINI_ENDPOINT", "\"$geminiEndpoint\"")
-        buildConfigField("String", "FINLIFE_API_KEY", "\"${project.findProperty("FINLIFE_API_KEY") ?: ""}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
