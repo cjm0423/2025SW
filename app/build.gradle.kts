@@ -1,12 +1,11 @@
-// app/build.gradle.kts
 import java.util.Properties  // ⬅️ 추가
 
-plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-parcelize")
-    id("com.google.gms.google-services")
-}
+        plugins {
+            id("com.android.application")
+            id("org.jetbrains.kotlin.android")
+            id("kotlin-parcelize")
+            id("com.google.gms.google-services")
+        }
 
 // ⬇️ local.properties / -P / 환경변수에서 값 읽기 헬퍼
 val localProps = Properties().apply {
