@@ -33,8 +33,8 @@ class SavingCalculatorBottomSheet : BottomSheetDialogFragment() {
         val inputMonths = v.findViewById<TextInputEditText>(R.id.inputMonths)
 
         val radioGroup = v.findViewById<RadioGroup>(R.id.radioRateGroup)
-        val radioBase = v.findViewById<MaterialRadioButton>(R.id.radioBase)
-        val radioPrefer = v.findViewById<MaterialRadioButton>(R.id.radioPrefer)
+        //val radioBase = v.findViewById<MaterialRadioButton>(R.id.radioBase)
+        //val radioPrefer = v.findViewById<MaterialRadioButton>(R.id.radioPrefer)
         val radioCustom = v.findViewById<MaterialRadioButton>(R.id.radioCustom)
 
         val tilCustomRate = v.findViewById<TextInputLayout>(R.id.tilCustomRate)
@@ -49,6 +49,7 @@ class SavingCalculatorBottomSheet : BottomSheetDialogFragment() {
         val txtResult = v.findViewById<TextView>(R.id.txtResult)
 
         // 라벨에 금리 노출
+        /*
         radioBase.text = "기본금리" + (baseRate?.let { " (${trim(it)}%)" } ?: " (미제공)")
         radioPrefer.text = "우대금리" + (preferRate?.let { " (${trim(it)}%)" } ?: " (미제공)")
 
@@ -64,6 +65,8 @@ class SavingCalculatorBottomSheet : BottomSheetDialogFragment() {
                 tilCustomRate.visibility = View.VISIBLE
             }
         }
+
+         */
 
         // 라디오 변경 시 직접입력란 표시/숨김
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -101,8 +104,8 @@ class SavingCalculatorBottomSheet : BottomSheetDialogFragment() {
             } else tilMonths.error = null
 
             val selAnnualRate = when (radioGroup.checkedRadioButtonId) {
-                R.id.radioBase -> baseRate
-                R.id.radioPrefer -> preferRate
+                //ㅂㅈㄷR.id.radioBase -> baseRate
+                //R.id.radioPrefer -> preferRate
                 else -> inputCustomRate.text?.toString()?.toDoubleOrNull()
             }
             if (selAnnualRate == null || selAnnualRate <= 0.0) {
