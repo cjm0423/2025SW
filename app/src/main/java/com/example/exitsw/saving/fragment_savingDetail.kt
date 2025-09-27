@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.exitsw.R
 import com.example.exitsw.SavingCalculatorBottomSheet
+import com.example.exitsw.saving.BankLogoUtil
 
 // 기존 템플릿에서 쓰던 파라미터 키 유지
 private const val ARG_PARAM1 = "param1"
@@ -54,10 +56,16 @@ class fragment_savingDetail : Fragment() {
         val nameTextView = view.findViewById<TextView>(R.id.text_saving_name)
         val bankTextView = view.findViewById<TextView>(R.id.text_bank_name)
         val noteTextView = view.findViewById<TextView>(R.id.text_note)
+        // ** 추가: 은행 로고를 표시할 ImageView 바인딩 **
+        val bankLogoImageView = view.findViewById<ImageView>(R.id.imageDetailBankLogo)
 
         nameTextView.text = productName ?: "-"
         bankTextView.text = bankName ?: "-"
         noteTextView.text = note ?: "-"
+
+        // ** 추가: BankLogoUtil을 사용하여 로고 이미지 설정 **
+        val logoResId = BankLogoUtil().getBankLogoRes(bankName)
+        bankLogoImageView.setImageResource(logoResId)
 
         // 계산하기 버튼 → 바텀시트 호출
         view.findViewById<View>(R.id.btn_calculate)?.setOnClickListener {
@@ -103,5 +111,5 @@ class fragment_savingDetail : Fragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+        }
     }
-}
