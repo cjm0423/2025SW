@@ -9,7 +9,8 @@ data class SavingProduct(
     @SerializedName("join_member") val join_member: String,
     @SerializedName("etc_note") val etc_note: String?,
     @SerializedName("intr_rate") val intr_rate: Double?,
-    @SerializedName("intr_rate2") val intr_rate2: Double?
+    @SerializedName("intr_rate2") val intr_rate2: Double?,
+    @SerializedName("homp_url") val homp_url: String?
 )
 
 data class UserInfo(

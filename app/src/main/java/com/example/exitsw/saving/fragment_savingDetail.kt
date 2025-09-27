@@ -65,6 +65,27 @@ class fragment_savingDetail : Fragment() {
                 .newInstance(baseRate = baseRate, preferRate = preferRate)
                 .show(parentFragmentManager, "saving_calc")
         }
+        // 신청하기 버튼 → homp_url로 외부 브라우저 열기
+        view.findViewById<View>(R.id.btnSave)?.setOnClickListener {
+            val rawUrl = arguments?.getString("apply_url")?.trim()
+            val finalUrl = rawUrl?.takeIf { it.isNotBlank() }?.let { url ->
+                if (url.startsWith("http://") || url.startsWith("https://")) url else "https://$url"
+            }
+
+            if (finalUrl.isNullOrBlank()) {
+                android.widget.Toast.makeText(requireContext(), "신청 URL이 없습니다.", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                try {
+                    val intent = android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse(finalUrl)
+                    )
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    android.widget.Toast.makeText(requireContext(), "URL을 열 수 없습니다.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         return view
     }
