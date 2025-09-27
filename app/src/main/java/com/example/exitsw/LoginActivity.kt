@@ -3,6 +3,7 @@ package com.example.exitsw
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.core.view.isVisible
+import androidx.activity.addCallback
 
 class LoginActivity : AppCompatActivity() {
 
@@ -26,10 +29,13 @@ class LoginActivity : AppCompatActivity() {
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
+
     // 중복 호출 방지 플래그
     private var signingIn = false
 
     private val btnKakaoLogin: ImageButton by lazy { findViewById(R.id.btnKakaoLogin) }
+
+    private val loadingOverlay by lazy { findViewById<View>(R.id.loadingOverlay) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,12 +52,18 @@ class LoginActivity : AppCompatActivity() {
             it.addOnSuccessListener { res -> handleAuthResult(res) }
                 .addOnFailureListener { t -> showAuthError(t) }
         }
+
+        onBackPressedDispatcher.addCallback(this) {
+            if (!signingIn) signingIn = true
+            //면 무시(대기 중 뒤로가기 차단)
+        }
     }
 
-    /** 로그인 버튼 상태 토글 */
+    /** 로그인/서버 처리 중 상태 토글 + 터치 차단 */
     private fun setSigningIn(inProgress: Boolean) {
         signingIn = inProgress
         btnKakaoLogin.isEnabled = !inProgress
+        loadingOverlay.isVisible = inProgress
     }
 
     /** Google Play services 상태 점검: 미설치/구버전이면 사용자에게 안내하고 로그인 시작 차단 */
@@ -97,10 +109,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleAuthResult(result: AuthResult) {
-        setSigningIn(false)
 
         val user = result.user
         if (user == null) {
+            setSigningIn(false)
             Toast.makeText(this, "로그인 실패: 사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
@@ -108,6 +120,7 @@ class LoginActivity : AppCompatActivity() {
         // 운영: 민감정보 최소화(토큰/페이로드 파싱/로그 남기지 않음)
         Log.d(TAG, "Firebase uid=${user.uid}, name=${user.displayName.orEmpty()}")
 
+        setSigningIn(true)
         routeByProfile(user.uid, user.displayName.orEmpty())
     }
 
@@ -116,21 +129,23 @@ class LoginActivity : AppCompatActivity() {
             .addOnSuccessListener { snap ->
                 if (snap.exists()) {
                     startActivity(Intent(this, MainActivity::class.java))
-                    finish()
                 } else {
                     val intent = Intent(this, SignupActivity::class.java).apply {
                         putExtra(EXTRA_UID, uid)
                         putExtra(EXTRA_NICKNAME, nicknameHint)
                     }
                     startActivity(intent)
-                    finish()
                 }
+                finish()
             }
             .addOnFailureListener { e ->
+                setSigningIn(false) // 실패했을 때만 다시 조작 가능
                 Log.e(TAG, "프로필 조회 실패", e)
                 Toast.makeText(this, "프로필 확인 실패: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
     }
+
+
 
     private fun showAuthError(t: Throwable) {
         setSigningIn(false)
