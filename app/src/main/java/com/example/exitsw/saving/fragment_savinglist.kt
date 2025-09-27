@@ -20,9 +20,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-import android.content.Intent
-import android.net.Uri
-import android.widget.Button
 import android.widget.Toast
 import com.example.exitsw.SavingProductAdapter
 
@@ -36,8 +33,6 @@ class fragment_savinglist : Fragment() {
         val bankName = product.kor_co_nm?.trim().orEmpty()
         val matchedUrl = bankUrlMap[bankName]  // 회사 API로부터 매칭된 URL
 
-        Log.d("SavingList", "clicked: ${product.fin_prdt_nm}, bank=${bankName}, matchedUrl=$matchedUrl, raw_homp=${product.homp_url}")
-
         val fragment = fragment_savingDetail().apply {
             arguments = Bundle().apply {
                 putString("product_name", product.fin_prdt_nm)
@@ -45,8 +40,6 @@ class fragment_savinglist : Fragment() {
                 putString("note", product.etc_note)
                 putDouble("base_rate", product.intr_rate ?: Double.NaN)
                 putDouble("prefer_rate", product.intr_rate2 ?: Double.NaN)
-
-                // ✅ 핵심: 매칭된 URL을 apply_url로 전달
                 putString("apply_url", matchedUrl)
             }
         }
@@ -96,9 +89,7 @@ class fragment_savinglist : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             try {
-                Log.d("SavingList", "API 호출 시작: getSavingProducts()")
                 val response = apiService.getSavingProducts("2ade02d411b65c561f4dd75b9b9516d5")
-                Log.d("SavingList", "HTTP status=${response.code()} success=${response.isSuccessful}")
 
                 if (!response.isSuccessful) {
                     Log.e("API_ERROR", "실패 코드: ${response.code()} / ${response.message()}")
@@ -106,34 +97,22 @@ class fragment_savinglist : Fragment() {
                 }
 
                 val productList = response.body()?.result?.baseList.orEmpty()
-                Log.i("SavingList", "불러온 상품 수=${productList.size}")
 
-                // ✅ 2단계: 회사 목록 조회 (회사 homp_url 확보)
                 val companyRes = apiService.getCompanies("2ade02d411b65c561f4dd75b9b9516d5")
                 val companyList = companyRes.body()?.result?.baseList.orEmpty()
-                // 은행명 -> homp_url 매핑
                 val urlByBank: Map<String, String> =
                     companyList
                         .mapNotNull { it.kor_co_nm?.trim()?.let { name -> name to (it.homp_url?.trim() ?: "") } }
                         .filter { it.second.isNotBlank() }
                         .toMap()
 
-                Log.d("SavingList", "회사 수=${companyList.size}, URL 보유 회사 수=${urlByBank.size}")
-
-                // ✅ 3단계: 상품에 URL 매칭 (상품의 homp_url이 null이므로, 은행명으로 채움)
-                //  - 현재 SavingProduct에는 homp_url 필드가 있지만 응답에서 null이므로,
-                //    상세 화면 인자로 넘길 때 이 매칭 URL을 사용합니다.
-                //  - RecyclerView 표시용 리스트는 그대로 products에 저장.
                 products = productList
 
-                // 검증 로그: 샘플 3건 매칭 결과
                 val sample = productList.take(3).joinToString {
                     val bank = it.kor_co_nm?.trim().orEmpty()
                     val u = urlByBank[bank]
                     "[${it.fin_prdt_nm} / ${bank} / matched_url=${u}]"
                 }
-                Log.d("SavingList", "샘플 매칭: $sample")
-
                 withContext(Dispatchers.Main) {
                     refreshRecycler(products)
 
