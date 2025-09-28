@@ -37,7 +37,7 @@ class fragment_savinglist : Fragment() {
             arguments = Bundle().apply {
                 putString("product_name", product.fin_prdt_nm)
                 putString("bank_name", product.kor_co_nm)
-                putString("note", product.etc_note)
+                putString("note", composeRichNote(product))
                 putDouble("base_rate", product.intr_rate ?: Double.NaN)
                 putDouble("prefer_rate", product.intr_rate2 ?: Double.NaN)
                 putString("apply_url", matchedUrl)
@@ -210,6 +210,15 @@ class fragment_savinglist : Fragment() {
             }
         }
         dialog.show()
+    }
+    // API데이터 불러오기
+    private fun composeRichNote(p: SavingProduct): String {
+        val parts = mutableListOf<String>()
+        p.etc_note?.trim()?.takeIf { it.isNotEmpty() }?.let { parts += it }
+        p.join_way?.trim()?.takeIf { it.isNotEmpty() }?.let { parts += "가입 방법\n$it" }  // 인식표 태그
+        p.mtrt_int?.trim()?.takeIf { it.isNotEmpty() }?.let { parts += "만기 후 이자\n$it" }  // 인식표 태그
+        p.spcl_cnd?.trim()?.takeIf { it.isNotEmpty() }?.let { parts += "우대 조건\n$it" }  // 인식표 태그
+        return if (parts.isNotEmpty()) parts.joinToString("\n\n— — — — —\n\n") else "-"
     }
 
     // ───────── Retrofit 정의 ─────────

@@ -49,10 +49,13 @@
 
         <TextView
             android:id="@+id/textOnelineEx"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/textOnelineEx"
             android:textColor="@color/black"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:breakStrategy="balanced"/>
     </LinearLayout>
 </LinearLayout>
