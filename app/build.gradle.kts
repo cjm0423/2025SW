@@ -37,7 +37,7 @@ android {
         val geminiKey = prop("GEMINI_API_KEY")
             ?: throw GradleException("GEMINI_API_KEY가 없습니다. local.properties 또는 환경변수/Gradle -P 로 설정하세요.")
         val geminiEndpoint = prop("GEMINI_ENDPOINT")
-            ?: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+            ?: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
         buildConfigField("String", "GEMINI_ENDPOINT", "\"$geminiEndpoint\"")
