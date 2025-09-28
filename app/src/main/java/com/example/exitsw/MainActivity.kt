@@ -1,5 +1,6 @@
 package com.example.exitsw
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ import com.example.exitsw.databinding.ActivityMainBinding
 import com.example.exitsw.main.MainFragment
 import com.example.exitsw.mypage.MypageFragment
 import com.example.exitsw.saving.fragment_savinglist
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
@@ -22,6 +24,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            val intent = Intent(this, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            finish()
+            return
+        }
 
         // 1. Firestore 오프라인 캐시 기능 활성화
         // 스마트폰 내부에 데이터를 저장하여 앱 로딩 속도를 높이고 오프라인을 지원합니다.

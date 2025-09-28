@@ -10,31 +10,41 @@
     android:layout_marginBottom="10dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
+    app:cardBackgroundColor="@android:color/white"
     android:foreground="?attr/selectableItemBackground">
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="160dp">
+        android:layout_height="wrap_content"
+        android:minHeight="120dp"
+        android:padding="12dp">
 
-        <!-- 메인 이미지 -->
+        <!-- 오른쪽: 이미지 (기존 imgRegion 그대로) -->
         <ImageView
             android:id="@+id/imgRegion"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="170dp"
+            android:layout_height="112dp"
             android:scaleType="centerCrop"
             android:contentDescription="지역 아이콘/사진"
-            tools:src="@drawable/ic_launcher_foreground" />
+            tools:src="@drawable/ic_launcher_foreground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- 텍스트 컨테이너: 왼쪽 정렬 -->
+        <!-- 왼쪽: 텍스트 컨테이너 (기존 id 그대로, 가변폭: 0dp) -->
         <LinearLayout
             android:id="@+id/textContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:gravity="center_vertical"
-            android:layout_gravity="start|center_vertical">
+            android:layout_marginEnd="12dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/imgRegion"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
                 android:id="@+id/textRegionName"
@@ -42,11 +52,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:shadowColor="#80000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
+                android:textColor="@android:color/black"
                 android:maxLines="1"
                 android:ellipsize="end"
                 tools:text="서울시" />
@@ -59,12 +65,8 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="#19B5FE"
-                android:shadowColor="#80000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
                 tools:text="72개 정책" />
         </LinearLayout>
 
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
