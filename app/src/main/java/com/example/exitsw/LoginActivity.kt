@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.common.ConnectionResult
@@ -16,6 +15,7 @@ import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.core.view.isVisible
 import androidx.activity.addCallback
+import androidx.appcompat.widget.AppCompatButton
 
 class LoginActivity : AppCompatActivity() {
 
@@ -33,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
     // 중복 호출 방지 플래그
     private var signingIn = false
 
-    private val btnKakaoLogin: ImageButton by lazy { findViewById(R.id.btnKakaoLogin) }
+    private val btnKakaoLogin: AppCompatButton by lazy { findViewById(R.id.btnKakaoLogin) }
 
     private val loadingOverlay by lazy { findViewById<View>(R.id.loadingOverlay) }
 
